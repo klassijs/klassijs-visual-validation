@@ -1,0 +1,26 @@
+{
+  "name": "klassijs-visual-validation",
+  "version": "1.0.0",
+  "creator": {
+    "name": "Larry Goddard",
+    "email": "larryg@klassitech.co.uk",
+    "twitter": "https://twitter.com/larryG_01",
+    "linkedin": "https://linkedin.com/in/larryg",
+    "youtube": "https://youtube.com/@LarryG_01"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/klassijs/klassijs-visual-validation.git"
+  },
+  "homepage": "https://github.com/klassijs/klassijs-visual-validation#readme",
+  "bugs": {
+    "url": "https://github.com/klassijs/klassijs-visual-validation/issues"
+  },
+  "dependencies": {
+    "@cucumber/cucumber": "^9.1.2",
+    "commander": "^10.0.0",
+    "fs-extra": "^11.1.0",
+    "node-resemble-js": "https://github.com/klassijs/node-resemble.js"
+  }
+}
