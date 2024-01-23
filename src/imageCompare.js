@@ -10,7 +10,7 @@ const fs = require('fs-extra');
 const program = require('commander');
 
 const envName = env.envName.toLowerCase();
-let browserName = settings.remoteConfig || BROWSER_NAME
+const browserName = settings.remoteConfig || BROWSER_NAME
 
 let fileName;
 let diffFile;
@@ -26,21 +26,11 @@ module.exports = {
    * @returns {Promise<void>}
    */
   takePageImage: async (filename, elementSnapshot, elementsToHide) => {
-    // const getRemote = require('../klassijs/getRemote');
-    // const remoteService = getRemote(settings.remoteService);
-    //
-    // if (remoteService && remoteService.type === 'lambdatest') {
-    //   browserName = settings.remoteConfig || BROWSER_NAME;
-    //   await browserName;
-    // } else {
-    //   browserName = settings.remoteConfig || program.opts().browser;
-    // }
-
     const resultDir = `./artifacts/visual-regression/original/${browserName}/${envName}/`;
     const resultDirPositive = `${resultDir}positive/`;
 
     if (elementsToHide) {
-      await helpers.hideElements(elementsToHide);
+      await module.exports.hideElements(elementsToHide);
     }
 
     fs.ensureDirSync(resultDirPositive); // Make sure destination folder exists, if not, create it
@@ -59,7 +49,7 @@ module.exports = {
     }
 
     if (elementsToHide) {
-      await helpers.showElements(elementsToHide);
+      await module.exports.showElements(elementsToHide);
     }
     console.log(`\t images saved to: ${resultPathPositive}`);
   },
@@ -198,5 +188,31 @@ module.exports = {
         throw `${err} - ${this.message}`;
       }
     };
+  },
+
+  /**
+   * hideElemements hide elements
+   * @param selectors
+   */
+  hideElements: async (selectors) => {
+    // if arg is no array make it one
+    selectors = typeof selectors === 'string' ? [selectors] : selectors;
+    for (let i = 0; i < selectors.length; i++) {
+      const script = `document.querySelectorAll('${selectors[i]}').forEach(element => element.style.opacity = '0')`;
+      await browser.execute(script);
+    }
+  },
+
+  /**
+   * showElemements show elements
+   * @param selectors
+   */
+  showElements: async (selectors) => {
+    // if arg is no array make it one
+    selectors = typeof selectors === 'string' ? [selectors] : selectors;
+    for (let i = 0; i < selectors.length; i++) {
+      const script = `document.querySelectorAll('${selectors[i]}').forEach(element => element.style.opacity = '1')`;
+      await browser.execute(script);
+    }
   },
 };
