@@ -10,10 +10,10 @@ const fs = require('fs-extra');
 const program = require('commander');
 
 const envName = env.envName.toLowerCase();
+let browserName = settings.remoteConfig || BROWSER_NAME
 
 let fileName;
 let diffFile;
-let browserName;
 
 module.exports = {
   /**
