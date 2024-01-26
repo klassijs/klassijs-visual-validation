@@ -10,9 +10,9 @@ const fs = require('fs-extra');
 const program = require('commander');
 const path = require('path');
 
-program
-    .option('--updateBaselineImage', 'automatically update the baseline image after a failed comparison', false)
-    .parse(process.argv);
+// program
+//     .option('--updateBaselineImage', 'automatically update the baseline image after a failed comparison', false)
+//     .parse(process.argv);
 // console.log('this is inside the module 1 =====>>>>>>>>> ', program.opts());
 
 const envName = env.envName.toLowerCase();
@@ -21,27 +21,27 @@ const browserName = settings.remoteConfig || BROWSER_NAME
 let fileName = [];
 let diffFile;
 let resolutions = [
-  {width: 320, height: 480}, // (e.g., iPhone 3GS)
-  {width: 360, height: 640}, // (e.g., Samsung Galaxy S4)
+  // {width: 320, height: 480}, // (e.g., iPhone 3GS)
+  // {width: 360, height: 640}, // (e.g., Samsung Galaxy S4)
   {width: 375, height: 667}, // (e.g., iPhone 6, 6s, 7, 8)
   {width: 414, height: 736}, // (e.g., iPhone 6 Plus, 6s Plus, 7 Plus, 8 Plus)
   {width: 375, height: 812}, // (e.g., iPhone X, XS, 11 Pro)
   {width: 414, height: 896}, // (e.g., iPhone XR, 11)
   {width: 360, height: 720}, // (e.g., various mid-range Android devices)
-  {width: 1080, height: 1920}, // (e.g., Samsung Galaxy S5, S6, S7, S8)
-  {width: 1440, height: 2560}, // (e.g., Samsung Galaxy S6 Edge, S7 Edge, S8 Plus)
+  // {width: 1080, height: 1920}, // (e.g., Samsung Galaxy S5, S6, S7, S8)
+  // {width: 1440, height: 2560}, // (e.g., Samsung Galaxy S6 Edge, S7 Edge, S8 Plus)
   {width: 1024, height: 768},
   {width: 1280, height: 720},
-  {width: 1280, height: 800},
+  // {width: 1280, height: 800},
   {width: 1280, height: 1024},
   {width: 1366, height: 768},
   {width: 1440, height: 900},
-  {width: 1600, height: 1200},
-  {width: 1680, height: 1050},
-  {width: 1920, height: 1080},
-  {width: 1920, height: 1200},
-  {width: 2048, height: 1536},
-  {width: 2560, height: 1440}
+  // {width: 1600, height: 1200},
+  // {width: 1680, height: 1050},
+  // {width: 1920, height: 1080},
+  // {width: 1920, height: 1200},
+  // {width: 2048, height: 1536},
+  // {width: 2560, height: 1440}
 ]
 
 let resolutionToString;
@@ -78,15 +78,15 @@ module.exports = {
     }
 
     fs.ensureDirSync(resultDirPositive); // Make sure destination folder exists, if not, create it
-    /** Logic to take an image of a whole page or an element image on a page */
+    /** Logic to take an image of a whole page or a single element on a page */
     for (const resolution of resolutions) {
       await browser.setWindowSize(resolution.width, resolution.height);
 
-      // Convert each object in the array to the desired format
+      /** Convert each object in the array to the desired format */
       const inputObject = resolution;
       resolutionToString = objectToString(inputObject);
 
-      resultPathPositive = `${resultDirPositive}${resolutionToString}-${filename}`;
+      const resultPathPositive = `${resultDirPositive}${resolutionToString}-${filename}`;
       if (elementSnapshot) {
         let elem = await browser.$(elementSnapshot);
         await elem.saveScreenshot(`${resultPathPositive}`, async (err) => {
@@ -101,8 +101,11 @@ module.exports = {
       if (elementsToHide) {
         await module.exports.showElements(elementsToHide);
       }
-      // idx++
+
       console.log(`\t images saved to: ${resultPathPositive}`);
+
+      // TODO: write logic to skip teh failed files until the end then report them
+      /** allows for the verification of each image from the array */
       await module.exports.assertion(filename);
       await module.exports.value();
       await module.exports.pass();
@@ -118,19 +121,9 @@ module.exports = {
    * @returns {Promise<void>}
    */
   assertion(filename, expected, result, value) {
-    // const baselineDir = `./visual-regression-baseline/${browserName}/${envName}/`;
-    // const resultDir = `./artifacts/visual-regression/original/${browserName}/${envName}/`;
-    // const resultDirPositive = `${resultDir}positive/`;
-    // const resultDirNegative = `${resultDir}negative/`;
-
-    // const diffDir = `./artifacts/visual-regression/diffs/${browserName}/${envName}/`;
-    // const diffDirPositive = `${diffDir}positive/`;
-    // const diffDirNegative = `${diffDir}negative/`;
-
-    // let idx = 1;
     fileName = filename;
     const baselinePath = `${baselineDir}${resolutionToString}-${filename}`;
-    resultPathPositive = `${resultDirPositive}${resolutionToString}-${filename}`;
+    const resultPathPositive = `${resultDirPositive}${resolutionToString}-${filename}`;
 
     fs.ensureDirSync(baselineDir); // Make sure destination folder exists, if not, create it
     fs.ensureDirSync(diffDirPositive); // Make sure destination folder exists, if not, create it
@@ -158,12 +151,8 @@ module.exports = {
         .onComplete(async (res) => {
           result = await res;
         });
-    // },
 
     this.value = async function () {
-      // value: async function() {
-      console.log('we are here ======================>>>>>>>>>>>>>>>>>>>>>>>>')
-      // let idx = 1;
       let filename = await fileName;
       const resultPathNegative = `${resultDirNegative}${resolutionToString}-${filename}`;
       const resultPathPositive = `${resultDirPositive}${resolutionToString}-${filename}`;
@@ -196,6 +185,10 @@ module.exports = {
       }
     }
 
+    /**
+     * This checks the image to verify pass or fail
+     * @returns {Promise<void>}
+     */
     this.pass = async function () {
       value = parseFloat(result.misMatchPercentage);
       this.message = `image Match Failed for ${filename} with a tolerance difference of ${`${
@@ -207,7 +200,7 @@ module.exports = {
       const err = value > this.expected;
 
       if (pass) {
-        console.log(`image Match for $${resolutionToString}-${filename} with ${value}% difference.`);
+        console.log(`image Match for ${resolutionToString}-${filename} with ${value}% difference.`);
         await browser.pause(DELAY_1s);
       }
 
@@ -240,6 +233,11 @@ module.exports = {
     }
   },
 
+  /**
+   * prints the error message to the console
+   * @param err
+   * @returns {Promise<void>}
+   */
   timeoutErrormsg: async (err) => {
     await browser.pause(DELAY_500ms);
     if (err) {
@@ -247,69 +245,8 @@ module.exports = {
     }
   },
 
-  baselineUpdate: async()=>{
-    console.log('we are here =====================>>>>>>>>>>>>>>>>>>>>>')
-    // if(updateBaseline){
-    // console.log(
-    //     `${this.message}   images at:\n` +
-    //     `   Baseline: ${baselinePath}\n` +
-    //     `   Result: ${resultPathNegative}\n` +
-    //     `    cp ${resultPathNegative} ${baselinePath}`
-    // );
-    // await fs.copy(resultPathNegative, baselinePath, (err) => {
-    //   console.log(` All Baseline images have now been updated from: ${resultPathNegative}`);
-    //   if (err) {
-    //     console.error('The Baseline images were NOT updated: ', err.message);
-    //     throw err;
-    //   }
-    // });
-    // } else if (err) {
-    //   console.log(
-    //       `${this.message}   images at:\n` +
-    //       `   Baseline: ${baselinePath}\n` +
-    //       `   Result: ${resultPathNegative}\n` +
-    //       `   Diff: ${diffFile}\n` +
-    //       `   Open ${diffFile} to see how the image has changed.\n` +
-    //       '   If the Resulting image is correct you can use it to update the Baseline image and re-run your test:\n' +
-    //       `    cp ${resultPathNegative} ${baselinePath}`
-    //   );
-    //   throw `${err} - ${this.message}`;
-    // }
-
-    // if (err === true && program.opts().updateBaselineImage) {
-    // // if (err === true && settings.updateBaselineImage) {
-    // // if (program.opts().updateBaselineImage) {
-    // // if (settings.updateBaselineImage) {
-    //   console.log('we are here =====================>>>>>>>>>>>>>>>>>>>>>')
-    //   console.log(
-    //     `${this.message}   images at:\n` +
-    //       `   Baseline: ${baselinePath}\n` +
-    //       `   Result: ${resultPathNegative}\n` +
-    //       `    cp ${resultPathNegative} ${baselinePath}`
-    //   );
-    //   await fs.copy(resultPathNegative, baselinePath, (err) => {
-    //     console.log(` All Baseline images have now been updated from: ${resultPathNegative}`);
-    //     if (err) {
-    //       console.error('The Baseline images were NOT updated: ', err.message);
-    //       throw err;
-    //     }
-    //   });
-    // } else if (err) {
-    //   console.log(
-    //     `${this.message}   images at:\n` +
-    //       `   Baseline: ${baselinePath}\n` +
-    //       `   Result: ${resultPathNegative}\n` +
-    //       `   Diff: ${diffFile}\n` +
-    //       `   Open ${diffFile} to see how the image has changed.\n` +
-    //       '   If the Resulting image is correct you can use it to update the Baseline image and re-run your test:\n' +
-    //       `    cp ${resultPathNegative} ${baselinePath}`
-    //   );
-    //   throw `${err} - ${this.message}`;
-    // }
-  },
-
   /**
-   * hideElemements hide elements
+   * hideElemements: remove all dynamic elements/content before the image is taken
    * @param selectors
    */
   hideElements: async (selectors) => {
@@ -322,7 +259,7 @@ module.exports = {
   },
 
   /**
-   * showElemements show elements
+   * showElemements: replace all dynamic elements/content after the image is taken
    * @param selectors
    */
   showElements: async (selectors) => {
