@@ -15,27 +15,36 @@ program
     .parse(process.argv);
 // console.log('this is inside the module 1 =====>>>>>>>>> ', program.opts());
 
-// const options = program.opts();
-// const settings = {
-//   updateBaselineImage: options.updateBaselineImage,
-// };
-// console.log('this is inside the module =====>>>>>>>>> ', process.argv)
-
 const envName = env.envName.toLowerCase();
 const browserName = settings.remoteConfig || BROWSER_NAME
 
 let fileName = [];
 let diffFile;
 let resolutions = [
-  {width: 1280, height:1024},
-  {width: 1740, height: 1024},
-  {width: 450, height: 800},
-  {width: 756, height: 1080}
+  {width: 320, height: 480}, // (e.g., iPhone 3GS)
+  {width: 360, height: 640}, // (e.g., Samsung Galaxy S4)
+  {width: 375, height: 667}, // (e.g., iPhone 6, 6s, 7, 8)
+  {width: 414, height: 736}, // (e.g., iPhone 6 Plus, 6s Plus, 7 Plus, 8 Plus)
+  {width: 375, height: 812}, // (e.g., iPhone X, XS, 11 Pro)
+  {width: 414, height: 896}, // (e.g., iPhone XR, 11)
+  {width: 360, height: 720}, // (e.g., various mid-range Android devices)
+  {width: 1080, height: 1920}, // (e.g., Samsung Galaxy S5, S6, S7, S8)
+  {width: 1440, height: 2560}, // (e.g., Samsung Galaxy S6 Edge, S7 Edge, S8 Plus)
+  {width: 1024, height: 768},
+  {width: 1280, height: 720},
+  {width: 1280, height: 800},
+  {width: 1280, height: 1024},
+  {width: 1366, height: 768},
+  {width: 1440, height: 900},
+  {width: 1600, height: 1200},
+  {width: 1680, height: 1050},
+  {width: 1920, height: 1080},
+  {width: 1920, height: 1200},
+  {width: 2048, height: 1536},
+  {width: 2560, height: 1440}
 ]
 
-let resultString;
-// let resultDirNegative;
-// let resultDirPositive;
+let resolutionToString;
 
 // Function to convert an object to the desired string format
 function objectToString(obj) {
@@ -52,50 +61,32 @@ const diffDir = `./artifacts/visual-regression/diffs/${browserName}/${envName}/`
 const diffDirPositive = `${diffDir}positive/`;
 const diffDirNegative = `${diffDir}negative/`;
 
-
 module.exports = {
   /**
-   * Take an image of the current page and saves it as the given filename.
+   * Take an image of the current page in multiple resolutions and saves it as the given filename.
    * @method saveScreenshot
    * @param {string} filename The complete path to the file name where the image should be saved.
    * @param elementsToHide
    * @param filename
    * @param elementSnapshot
-   * @param resolutions
    * @returns {Promise<void>}
    */
-  // takePageImage: async (filename, elementSnapshot, elementsToHide, resolutions = [
-  //     {width: 1280, height:1024},
-  //     {width: 1920, height: 1080},
-  //     {width: 200, height: 200}]
   takePageImage: async (filename, elementSnapshot, elementsToHide
   ) => {
-    // const resultDir = `./artifacts/visual-regression/original/${browserName}/${envName}/`;
-    // const resultDirPositive = `${resultDir}positive/`;
-
     if (elementsToHide) {
       await module.exports.hideElements(elementsToHide);
     }
 
     fs.ensureDirSync(resultDirPositive); // Make sure destination folder exists, if not, create it
-    // resultPathPositive = `${resultDirPositive}${idx}-${filename}`;
     /** Logic to take an image of a whole page or an element image on a page */
-    // let idx = 1;
     for (const resolution of resolutions) {
-      // console.log(resultDirPositive,resolution,idx,filename );
-      // console.log('list of images to use =====>>>>> : ', '-', resolution,  filename);
       await browser.setWindowSize(resolution.width, resolution.height);
-      // console.log(`list of images to use =====>>>>> : ${idx}-${filename}`);
-      // resultPathPositive = `${resultDirPositive}${idx}-${filename}`;
 
       // Convert each object in the array to the desired format
       const inputObject = resolution;
-      // const resultString = objectToString(inputObject);
-      resultString = objectToString(inputObject);
-      // console.log(resultDirPositive,resultString,idx,filename );
+      resolutionToString = objectToString(inputObject);
 
-      resultPathPositive = `${resultDirPositive}${resultString}-${filename}`;
-      // resultPathPositive = (resultDirPositive,resolution,idx,filename);
+      resultPathPositive = `${resultDirPositive}${resolutionToString}-${filename}`;
       if (elementSnapshot) {
         let elem = await browser.$(elementSnapshot);
         await elem.saveScreenshot(`${resultPathPositive}`, async (err) => {
@@ -138,8 +129,8 @@ module.exports = {
 
     // let idx = 1;
     fileName = filename;
-    const baselinePath = `${baselineDir}${resultString}-${filename}`;
-    resultPathPositive = `${resultDirPositive}${resultString}-${filename}`;
+    const baselinePath = `${baselineDir}${resolutionToString}-${filename}`;
+    resultPathPositive = `${resultDirPositive}${resolutionToString}-${filename}`;
 
     fs.ensureDirSync(baselineDir); // Make sure destination folder exists, if not, create it
     fs.ensureDirSync(diffDirPositive); // Make sure destination folder exists, if not, create it
@@ -174,8 +165,8 @@ module.exports = {
       console.log('we are here ======================>>>>>>>>>>>>>>>>>>>>>>>>')
       // let idx = 1;
       let filename = await fileName;
-      const resultPathNegative = `${resultDirNegative}${resultString}-${filename}`;
-      const resultPathPositive = `${resultDirPositive}${resultString}-${filename}`;
+      const resultPathNegative = `${resultDirNegative}${resolutionToString}-${filename}`;
+      const resultPathPositive = `${resultDirPositive}${resolutionToString}-${filename}`;
       while (typeof result === 'undefined') {
         await browser.pause(DELAY_100ms);
       }
@@ -183,7 +174,7 @@ module.exports = {
       fs.ensureDirSync(diffDirNegative); // Make sure destination folder exists, if not, create it
 
       if (error > this.expected) {
-        diffFile = `${diffDirNegative}${resultString}-${filename}`;
+        diffFile = `${diffDirNegative}${resolutionToString}-${filename}`;
 
         const writeStream = fs.createWriteStream(diffFile);
         await result.getDiffImage().pack().pipe(writeStream);
@@ -195,7 +186,7 @@ module.exports = {
         fs.moveSync(resultPathPositive, resultPathNegative, false);
         console.log(`\t Create diff image [negative]: ${diffFile}`);
       } else {
-        diffFile = `${diffDirPositive}${resultString}-${filename}`;
+        diffFile = `${diffDirPositive}${resolutionToString}-${filename}`;
 
         const writeStream = fs.createWriteStream(diffFile);
         result.getDiffImage().pack().pipe(writeStream);
@@ -210,13 +201,13 @@ module.exports = {
       this.message = `image Match Failed for ${filename} with a tolerance difference of ${`${
           value - this.expected
       } - expected: ${this.expected} but got: ${value}`}`;
-      const baselinePath = `${baselineDir}${resultString}-${filename}`;
-      const resultPathNegative = `${resultDirNegative}${resultString}-${filename}`;
+      const baselinePath = `${baselineDir}${resolutionToString}-${filename}`;
+      const resultPathNegative = `${resultDirNegative}${resolutionToString}-${filename}`;
       const pass = value <= this.expected;
       const err = value > this.expected;
 
       if (pass) {
-        console.log(`image Match for $${resultString}-${filename} with ${value}% difference.`);
+        console.log(`image Match for $${resolutionToString}-${filename} with ${value}% difference.`);
         await browser.pause(DELAY_1s);
       }
 
