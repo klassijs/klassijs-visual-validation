@@ -21,18 +21,19 @@ const browserName = settings.remoteConfig || BROWSER_NAME
 let fileName = [];
 let diffFile;
 let resolutions = [
-  {width: 360, height: 780},
-  {width: 360, height: 800},
+    // source: https://www.hobo-web.co.uk/best-screen-size/
+  {width: 360, height: 800}, // mobile
   {width: 390, height: 844},
-  {width: 393, height: 873},
-  {width: 412, height: 915},
   {width: 414, height: 896},
-  {width: 1280, height: 720},
+  {width: 412, height: 915},
+  {width: 1920, height: 1080}, // desktop
   {width: 1366, height: 768},
-  {width: 1440, height: 900},
   {width: 1536, height: 864},
-  {width: 1920, height: 1080},
-  {width: 2560, height: 1440}
+  {width: 1280, height: 720},
+  {width: 768, height: 1024}, // tablet
+  {width: 810, height: 1080},
+  {width: 800, height: 1280},
+  {width: 1280, height: 800}
 ]
 
 let resolutionToString;
@@ -266,3 +267,4 @@ module.exports = {
     }
   },
 };
+
