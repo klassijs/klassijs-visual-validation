@@ -8,10 +8,10 @@
 const resemble = require('klassijs-resembleJs');
 const fs = require('fs-extra');
 const program = require('commander');
-const path = require('path');
 
+// TODO: make this so that its usable outside the framework
 // program
-//     .option('--updateBaselineImage', 'automatically update the baseline image after a failed comparison', false)
+//     .option('--updateBaselineImages', 'automatically update the baseline image after a failed comparison', false)
 //     .parse(process.argv);
 // console.log('this is inside the module 1 =====>>>>>>>>> ', program.opts());
 
@@ -21,32 +21,27 @@ const browserName = settings.remoteConfig || BROWSER_NAME
 let fileName = [];
 let diffFile;
 let resolutions = [
-  // {width: 320, height: 480}, // (e.g., iPhone 3GS)
-  // {width: 360, height: 640}, // (e.g., Samsung Galaxy S4)
-  {width: 375, height: 667}, // (e.g., iPhone 6, 6s, 7, 8)
-  {width: 414, height: 736}, // (e.g., iPhone 6 Plus, 6s Plus, 7 Plus, 8 Plus)
-  {width: 375, height: 812}, // (e.g., iPhone X, XS, 11 Pro)
-  {width: 414, height: 896}, // (e.g., iPhone XR, 11)
-  {width: 360, height: 720}, // (e.g., various mid-range Android devices)
-  // {width: 1080, height: 1920}, // (e.g., Samsung Galaxy S5, S6, S7, S8)
-  // {width: 1440, height: 2560}, // (e.g., Samsung Galaxy S6 Edge, S7 Edge, S8 Plus)
-  {width: 1024, height: 768},
+  {width: 360, height: 780},
+  {width: 360, height: 800},
+  {width: 390, height: 844},
+  {width: 393, height: 873},
+  {width: 412, height: 915},
+  {width: 414, height: 896},
   {width: 1280, height: 720},
-  // {width: 1280, height: 800},
-  {width: 1280, height: 1024},
   {width: 1366, height: 768},
   {width: 1440, height: 900},
-  // {width: 1600, height: 1200},
-  // {width: 1680, height: 1050},
-  // {width: 1920, height: 1080},
-  // {width: 1920, height: 1200},
-  // {width: 2048, height: 1536},
-  // {width: 2560, height: 1440}
+  {width: 1536, height: 864},
+  {width: 1920, height: 1080},
+  {width: 2560, height: 1440}
 ]
 
 let resolutionToString;
 
-// Function to convert an object to the desired string format
+/**
+ * Function to convert an object to the desired string format
+ * @param obj
+ * @returns {string}
+ */
 function objectToString(obj) {
   return Object.entries(obj)
       .map(([key, value]) => `${key}-${value}`)
@@ -204,7 +199,7 @@ module.exports = {
         await browser.pause(DELAY_1s);
       }
 
-      if (err === true && program.opts().updateBaselineImage) {
+      if (err === true && program.opts().updateBaselineImages) {
         console.log(
             `${this.message}   images at:\n` +
             `   Baseline: ${baselinePath}\n` +

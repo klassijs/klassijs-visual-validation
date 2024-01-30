@@ -1,3 +1,3 @@
-const {takeImage, compareImage} = require('./utils/common');
+const {takeImage, compareImage, visualValidation} = require('./utils/common');
 
-module.exports = {takeImage, compareImage};
+module.exports = {takeImage, compareImage, visualValidation};
