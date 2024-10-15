@@ -36,10 +36,11 @@ module.exports = {
      * @returns {Promise<void>}
      */
     visualValidation: async (fileName='', elementSnapshot= null, elementsToHide = "") => {
-        await verify.takePageImage(fileName, elementSnapshot, elementsToHide);
-        await verify.assertion(fileName);
-        await verify.value();
-        await verify.pass();
+        await verify.takePageImage(fileName, elementSnapshot, elementsToHide).then(async () => {
+            await browser.pause(DELAY_100ms);
+            await verify.assertion(fileName);
+            await verify.value();
+            await verify.pass();
+        })
     },
-
 }
