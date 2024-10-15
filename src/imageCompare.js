@@ -39,11 +39,11 @@ async function takePageImage(filename, elementSnapshot, elementsToHide){
   if (elementSnapshot) {
     let elem = await browser.$(elementSnapshot);
     await elem.saveScreenshot(resultPathPositive, async (err) => {
-      await module.exports.timeoutErrormsg(err);
+      await timeoutErrormsg(err);
     });
   } else {
     await browser.saveScreenshot(resultPathPositive, async (err) => {
-      await module.exports.timeoutErrormsg(err);
+      await timeoutErrormsg(err);
     });
   }
 
@@ -53,7 +53,7 @@ async function takePageImage(filename, elementSnapshot, elementsToHide){
   console.log(`\t images saved to: ${resultPathPositive}`);
 }
 
-timeoutErrormsg: async (err) => {
+async function timeoutErrormsg(err){
   await browser.pause(DELAY_500ms);
   if (err) {
     console.error(err.message);

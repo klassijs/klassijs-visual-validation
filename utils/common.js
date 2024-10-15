@@ -1,14 +1,12 @@
-const { takePageImage, imageAssertion, hideElements, showElements } = require('../src/imageCompare');
+const { takePageImage, imageAssertion } = require('../src/imageCompare');
 
-
-// module.exports = {
 /**
  * Visual comparison function
  * @param fileName
  * @returns {Promise<void>}
  */
 async function compareImage(fileName){
-    await imageAssertion(fileName);
+    await imageAssertion(fileName, null, null, null);
 }
 
 /**
@@ -22,7 +20,6 @@ async function compareImage(fileName){
  */
 async function takeImage(fileName, elementSnapshot, elementsToHide = ''){
     await takePageImage(fileName, elementSnapshot, elementsToHide);
-    await browser.pause(DELAY_500ms);
 }
-// }
+
 module.exports = { compareImage, takeImage };
