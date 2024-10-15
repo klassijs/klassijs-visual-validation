@@ -29,7 +29,7 @@ async function takePageImage(filename, elementSnapshot, elementsToHide){
   const resultDirPositive = `${resultDir}positive/`;
 
   if (elementsToHide) {
-    await module.exports.hideElements(elementsToHide);
+    await hideElements(elementsToHide);
   }
 
   fs.ensureDirSync(resultDirPositive); // Make sure destination folder exists, if not, create it
@@ -48,7 +48,7 @@ async function takePageImage(filename, elementSnapshot, elementsToHide){
   }
 
   if (elementsToHide) {
-    await module.exports.showElements(elementsToHide);
+    await showElements(elementsToHide);
   }
   console.log(`\t images saved to: ${resultPathPositive}`);
 }
@@ -194,7 +194,7 @@ async function imageAssertion(filename, expected, result, value) {
  * @param selectors
  */
 async function hideElements(selectors) {
-  // if arg is no array make it one
+  // if arg is not an array make it one
   selectors = typeof selectors === 'string' ? [selectors] : selectors;
   for (let i = 0; i < selectors.length; i++) {
     const script = `document.querySelectorAll('${selectors[i]}').forEach(element => element.style.opacity = '0')`;
@@ -207,7 +207,7 @@ async function hideElements(selectors) {
  * @param selectors
  */
 async function showElements(selectors){
-  // if arg is no array make it one
+  // if arg is not an array make it one
   selectors = typeof selectors === 'string' ? [selectors] : selectors;
   for (let i = 0; i < selectors.length; i++) {
     const script = `document.querySelectorAll('${selectors[i]}').forEach(element => element.style.opacity = '1')`;
@@ -215,4 +215,4 @@ async function showElements(selectors){
   }
 }
 
-module.exports = { takePageImage, imageAssertion, hideElements, showElements };
+module.exports = { takePageImage, imageAssertion };
