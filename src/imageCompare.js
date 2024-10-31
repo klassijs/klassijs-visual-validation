@@ -8,9 +8,9 @@
 const resemble = require('klassijs-resembleJs');
 const fs = require('fs-extra');
 const program = require('commander');
+const { ASB } = require('klassijs-getsetter');
 
 const envName = env.envName.toLowerCase();
-const browserName = settings.remoteConfig || BROWSER_NAME
 
 let fileName;
 let diffFile;
@@ -25,6 +25,7 @@ let diffFile;
  * @returns {Promise<void>}
  */
 async function takePageImage(filename, elementSnapshot, elementsToHide){
+  const browserName = ASB.get('BROWSER_NAME');
   const resultDir = `./artifacts/visual-regression/original/${browserName}/${envName}/`;
   const resultDirPositive = `${resultDir}positive/`;
 
@@ -69,6 +70,7 @@ async function timeoutErrormsg(err){
  * @returns {Promise<void>}
  */
 async function imageAssertion(filename, expected, result, value) {
+  const browserName = ASB.get('BROWSER_NAME');
   const baselineDir = `./visual-regression-baseline/${browserName}/${envName}/`;
   const resultDir = `./artifacts/visual-regression/original/${browserName}/${envName}/`;
   const resultDirPositive = `${resultDir}positive/`;
