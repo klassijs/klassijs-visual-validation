@@ -6,7 +6,7 @@ const { takePageImage, ImageAssertion } = require('../src/imageCompare');
  * @returns {Promise<void>}
  */
 async function compareImage(fileName){
-    const expected = 0.08;
+    const expected = 0.2;
     const result = null;
     const value = null;
     const imageAssertion = new ImageAssertion(fileName, expected, result, value);

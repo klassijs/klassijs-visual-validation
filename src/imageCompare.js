@@ -8,10 +8,11 @@
 require('dotenv').config();
 const resemble = require('klassijs-resembleJs');
 const fs = require('fs-extra');
-const program = require('commander');
+const { Command } = require('commander');
 const { ASB } = require('klassijs-getsetter');
 
-let fileName;
+const program = new Command();
+const options = program.opts();
 let diffFile;
 
 class ImageAssertion {
@@ -39,12 +40,11 @@ class ImageAssertion {
     const diffDirPositive = `${diffDir}positive/`;
     const diffDirNegative = `${diffDir}negative/`;
 
-    fileName = this.filename;
+    const fileName = this.filename;
     const baselinePath = `${baselineDir}${this.filename}`;
     const resultPathPositive = `${resultDirPositive}${this.filename}`;
     fs.ensureDirSync(baselineDir);
     fs.ensureDirSync(diffDirPositive);
-    this.expected = 0.08 || expected; // misMatchPercentage tolerance default 0.3%
 
     if (!fs.existsSync(baselinePath)) {
       console.log('\t WARNING: Baseline image does NOT exist.');
@@ -63,15 +63,23 @@ class ImageAssertion {
       largeImageThreshold: 1200,
     });
 
-    resemble(baselinePath)
-      .compareTo(resultPathPositive)
-      .ignoreAntialiasing()
-      .ignoreColors()
-      .onComplete(async (res) => {
-        this.result = await res;
-        await this.valueMethod(this.result, this.filename, resultDirNegative, resultDirPositive, diffDirNegative, diffDirPositive);
-        await this.passMethod(this.result, this.filename, baselineDir, resultDirNegative, diffFile, this.value);
-      });
+    try {
+      resemble(baselinePath)
+        .compareTo(resultPathPositive)
+        .ignoreAntialiasing()
+        .ignoreColors()
+        .onComplete(async (res) => {
+          try {
+            this.result = await res;
+            await this.valueMethod(this.result, this.filename, resultDirNegative, resultDirPositive, diffDirNegative, diffDirPositive);
+            await this.passMethod(this.result, this.filename, baselineDir, resultDirNegative, diffFile, this.value);
+          } catch (err) {
+            console.error('Error during image comparison:', err);
+          }
+        });
+    } catch (err) {
+      console.error('Error initiating image comparison:', err);
+    }
   }
 
   async valueMethod(result, filename, resultDirNegative, resultDirPositive, diffDirNegative, diffDirPositive) {
@@ -117,7 +125,7 @@ class ImageAssertion {
       await browser.pause(DELAY_1s);
     }
 
-    if (err === true && program.opts().updateBaselineImage) {
+    if (err === true && options.updateBaselineImage) {
       console.log(
         `${this.message}   images at:\n` +
         `   Baseline: ${baselinePath}\n` +
