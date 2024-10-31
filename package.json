@@ -32,8 +32,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "commander": "^10.0.0",
-    "fs-extra": "^11.1.0",
-    "klassijs-resembleJs": "https://github.com/klassijs/klassijs-resembleJs"
+    "commander": "^12.1.0",
+    "fs-extra": "^11.2.0",
+    "klassijs-getsetter": "github:klassijs/klassijs-getsetter",
+    "klassijs-resembleJs": "github:klassijs/klassijs-resembleJs"
   }
 }

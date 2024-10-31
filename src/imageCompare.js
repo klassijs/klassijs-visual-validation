@@ -5,153 +5,108 @@
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
  furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  */
+require('dotenv').config();
 const resemble = require('klassijs-resembleJs');
 const fs = require('fs-extra');
 const program = require('commander');
 const { ASB } = require('klassijs-getsetter');
 
-const envName = env.envName.toLowerCase();
-
 let fileName;
 let diffFile;
 
-/**
- * Take an image of the current page and saves it as the given filename.
- * @method saveScreenshot
- * @param {string} filename The complete path to the file name where the image should be saved.
- * @param elementsToHide
- * @param filename
- * @param elementSnapshot
- * @returns {Promise<void>}
- */
-async function takePageImage(filename, elementSnapshot, elementsToHide){
-  const browserName = ASB.get('BROWSER_NAME');
-  const resultDir = `./artifacts/visual-regression/original/${browserName}/${envName}/`;
-  const resultDirPositive = `${resultDir}positive/`;
+class ImageAssertion {
+  constructor(filename, expected, result, value) {
+    this.filename = filename;
+    this.expected = expected;
+    this.result = result;
+    this.value = value;
 
-  if (elementsToHide) {
-    await hideElements(elementsToHide);
+    // Bind methods to the instance
+    this.run = this.run.bind(this);
+    this.valueMethod = this.valueMethod.bind(this);
+    this.passMethod = this.passMethod.bind(this);
   }
 
-  fs.ensureDirSync(resultDirPositive); // Make sure destination folder exists, if not, create it
-  const resultPathPositive = `${resultDirPositive}${filename}`;
+  async run() {
+    const envName = env.envName.toLowerCase();
+    const browserName = ASB.get('BROWSER_NAME');
+    const baselineDir = `./visual-regression-baseline/${browserName}/${envName}/`;
+    const resultDir = `./artifacts/visual-regression/original/${browserName}/${envName}/`;
+    const resultDirPositive = `${resultDir}positive/`;
+    const resultDirNegative = `${resultDir}negative/`;
 
-  /** Logic to take an image of a whole page or an element image on a page */
-  if (elementSnapshot) {
-    let elem = await browser.$(elementSnapshot);
-    await elem.saveScreenshot(resultPathPositive, async (err) => {
-      await timeoutErrormsg(err);
+    const diffDir = `./artifacts/visual-regression/diffs/${browserName}/${envName}/`;
+    const diffDirPositive = `${diffDir}positive/`;
+    const diffDirNegative = `${diffDir}negative/`;
+
+    fileName = this.filename;
+    const baselinePath = `${baselineDir}${this.filename}`;
+    const resultPathPositive = `${resultDirPositive}${this.filename}`;
+    fs.ensureDirSync(baselineDir);
+    fs.ensureDirSync(diffDirPositive);
+    this.expected = 0.08 || expected; // misMatchPercentage tolerance default 0.3%
+
+    if (!fs.existsSync(baselinePath)) {
+      console.log('\t WARNING: Baseline image does NOT exist.');
+      console.log(`\t Creating Baseline image from Result: ${baselinePath}`);
+      fs.writeFileSync(baselinePath, fs.readFileSync(resultPathPositive));
+    }
+
+    resemble.outputSettings({
+      errorColor: {
+        red: 225,
+        green: 0,
+        blue: 225,
+      },
+      errorType: 'movement',
+      transparency: 0.1,
+      largeImageThreshold: 1200,
     });
-  } else {
-    await browser.saveScreenshot(resultPathPositive, async (err) => {
-      await timeoutErrormsg(err);
-    });
+
+    resemble(baselinePath)
+      .compareTo(resultPathPositive)
+      .ignoreAntialiasing()
+      .ignoreColors()
+      .onComplete(async (res) => {
+        this.result = await res;
+        await this.valueMethod(this.result, this.filename, resultDirNegative, resultDirPositive, diffDirNegative, diffDirPositive);
+        await this.passMethod(this.result, this.filename, baselineDir, resultDirNegative, diffFile, this.value);
+      });
   }
 
-  if (elementsToHide) {
-    await showElements(elementsToHide);
-  }
-  console.log(`\t images saved to: ${resultPathPositive}`);
-}
-
-async function timeoutErrormsg(err){
-  await browser.pause(DELAY_500ms);
-  if (err) {
-    console.error(err.message);
-  }
-}
-
-/**
- * Runs assertions and comparison checks on the taken images
- * @param filename
- * @param expected
- * @param result
- * @param value
- * @returns {Promise<void>}
- */
-async function imageAssertion(filename, expected, result, value) {
-  const browserName = ASB.get('BROWSER_NAME');
-  const baselineDir = `./visual-regression-baseline/${browserName}/${envName}/`;
-  const resultDir = `./artifacts/visual-regression/original/${browserName}/${envName}/`;
-  const resultDirPositive = `${resultDir}positive/`;
-  const resultDirNegative = `${resultDir}negative/`;
-
-  const diffDir = `./artifacts/visual-regression/diffs/${browserName}/${envName}/`;
-  const diffDirPositive = `${diffDir}positive/`;
-  const diffDirNegative = `${diffDir}negative/`;
-
-  fileName = filename;
-  const baselinePath = `${baselineDir}${filename}`;
-  const resultPathPositive = `${resultDirPositive}${filename}`;
-  fs.ensureDirSync(baselineDir); // Make sure destination folder exists, if not, create it
-  fs.ensureDirSync(diffDirPositive); // Make sure destination folder exists, if not, create it
-  this.expected = 0.2 || expected; // misMatchPercentage tolerance default 0.3%
-  if (!fs.existsSync(baselinePath)) {
-    // create new baseline image if none exists
-    console.log('\t WARNING: Baseline image does NOT exist.');
-    console.log(`\t Creating Baseline image from Result: ${baselinePath}`);
-    fs.writeFileSync(baselinePath, fs.readFileSync(resultPathPositive));
-  }
-  resemble.outputSettings({
-    errorColor: {
-      red: 225,
-      green: 0,
-      blue: 225,
-    },
-    errorType: 'movement',
-    transparency: 0.1,
-    largeImageThreshold: 1200,
-  });
-  resemble(baselinePath)
-    .compareTo(resultPathPositive)
-    .ignoreAntialiasing()
-    .ignoreColors()
-    .onComplete(async (res) => {
-      result = await res;
-    });
-  /**
-   * @returns {Promise<void>}
-   */
-  this.value = async function () {
-    filename = await fileName;
+  async valueMethod(result, filename, resultDirNegative, resultDirPositive, diffDirNegative, diffDirPositive) {
     const resultPathNegative = `${resultDirNegative}${filename}`;
     const resultPathPositive = `${resultDirPositive}${filename}`;
     while (typeof result === 'undefined') {
       await browser.pause(DELAY_100ms);
     }
-    const error = parseFloat(result.misMatchPercentage); // value this.pass is called with
-    fs.ensureDirSync(diffDirNegative); // Make sure destination folder exists, if not, create it
+    const error = parseFloat(result.misMatchPercentage);
+    fs.ensureDirSync(diffDirNegative);
 
     if (error > this.expected) {
       diffFile = `${diffDirNegative}${filename}`;
-
       const writeStream = fs.createWriteStream(diffFile);
       await result.getDiffImage().pack().pipe(writeStream);
       writeStream.on('error', (err) => {
         console.log('this is the writeStream error ', err);
       });
-      fs.ensureDirSync(resultDirNegative); // Make sure destination folder exists, if not, create it
+      fs.ensureDirSync(resultDirNegative);
       fs.removeSync(resultPathNegative);
       fs.moveSync(resultPathPositive, resultPathNegative, false);
       console.log(`\t Create diff image [negative]: ${diffFile}`);
     } else {
       diffFile = `${diffDirPositive}${filename}`;
-
       const writeStream = fs.createWriteStream(diffFile);
       result.getDiffImage().pack().pipe(writeStream);
       writeStream.on('error', (err) => {
         console.log('this is the writeStream error ', err);
       });
     }
-  };
-  /**
-   * @returns {Promise<boolean>}
-   */
-  this.pass = async function () {
+  }
+
+  async passMethod(result, filename, baselineDir, resultDirNegative, diffFile, value) {
     value = parseFloat(result.misMatchPercentage);
-    this.message = `image Match Failed for ${filename} with a tolerance difference of ${`${
-      value - this.expected
-    } - expected: ${this.expected} but got: ${value}`}`;
+    this.message = `image Match Failed for ${filename} with a tolerance difference of ${value - this.expected} - expected: ${this.expected} but got: ${value}`;
     const baselinePath = `${baselineDir}${filename}`;
     const resultPathNegative = `${resultDirNegative}${filename}`;
     const pass = value <= this.expected;
@@ -188,8 +143,46 @@ async function imageAssertion(filename, expected, result, value) {
       );
       throw `${err} - ${this.message}`;
     }
-  };
+  }
 }
+
+async function takePageImage(filename, elementSnapshot = null, elementsToHide = null) {
+  const envName = env.envName.toLowerCase();
+  const browserName = ASB.get('BROWSER_NAME');
+  const resultDir = `./artifacts/visual-regression/original/${browserName}/${envName}/`;
+  const resultDirPositive = `${resultDir}positive/`;
+
+  if (elementsToHide) {
+    await hideElements(elementsToHide);
+  }
+
+  fs.ensureDirSync(resultDirPositive);
+  const resultPathPositive = `${resultDirPositive}${filename}`;
+
+  if (elementSnapshot) {
+    let elem = await browser.$(elementSnapshot);
+    await elem.saveScreenshot(resultPathPositive, async (err) => {
+      await timeoutErrormsg(err);
+    });
+  } else {
+    await browser.saveScreenshot(resultPathPositive, async (err) => {
+      await timeoutErrormsg(err);
+    });
+  }
+
+  if (elementsToHide) {
+    await showElements(elementsToHide);
+  }
+  console.log(`\t images saved to: ${resultPathPositive}`);
+}
+
+async function timeoutErrormsg(err) {
+  await browser.pause(DELAY_500ms);
+  if (err) {
+    console.error(err.message);
+  }
+}
+
 
 /**
  * hideElemements hide elements
@@ -217,4 +210,7 @@ async function showElements(selectors){
   }
 }
 
-module.exports = { takePageImage, imageAssertion };
+module.exports = {
+  takePageImage,
+  ImageAssertion
+};

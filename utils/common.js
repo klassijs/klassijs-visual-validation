@@ -1,4 +1,4 @@
-const { takePageImage, imageAssertion } = require('../src/imageCompare');
+const { takePageImage, ImageAssertion } = require('../src/imageCompare');
 
 /**
  * Visual comparison function
@@ -6,7 +6,11 @@ const { takePageImage, imageAssertion } = require('../src/imageCompare');
  * @returns {Promise<void>}
  */
 async function compareImage(fileName){
-    await imageAssertion(fileName, null, null, null);
+    const expected = 0.08;
+    const result = null;
+    const value = null;
+    const imageAssertion = new ImageAssertion(fileName, expected, result, value);
+    await imageAssertion.run();
 }
 
 /**

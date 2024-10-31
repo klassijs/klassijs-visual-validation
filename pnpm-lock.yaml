@@ -1,0 +1,88 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      commander:
+        specifier: ^12.1.0
+        version: 12.1.0
+      fs-extra:
+        specifier: ^11.2.0
+        version: 11.2.0
+      klassijs-getsetter:
+        specifier: github:klassijs/klassijs-getsetter
+        version: git+https://git@github.com:klassijs/klassijs-getsetter.git#4fdc96cf7141bbda255c0a08e283c3afff5943c6
+      klassijs-resembleJs:
+        specifier: github:klassijs/klassijs-resembleJs
+        version: node-resemble-js@https://codeload.github.com/klassijs/klassijs-resembleJs/tar.gz/76b8749478e840ef627ac674861f8c402b833972
+
+packages:
+
+  commander@12.1.0:
+    resolution: {integrity: sha512-Vw8qHK3bZM9y/P10u3Vib8o/DdkvA2OtPtZvD871QKjy74Wj1WSKFILMPRPSdUSx5RFK1arlJzEtA4PkFgnbuA==}
+    engines: {node: '>=18'}
+
+  fs-extra@11.2.0:
+    resolution: {integrity: sha512-PmDi3uwK5nFuXh7XDTlVnS17xJS7vW36is2+w3xcv8SVxiB4NyATf4ctkVY5bkSjX0Y4nbvZCq1/EjtEyr9ktw==}
+    engines: {node: '>=14.14'}
+
+  graceful-fs@4.2.11:
+    resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
+
+  jpeg-js@0.4.4:
+    resolution: {integrity: sha512-WZzeDOEtTOBK4Mdsar0IqEU5sMr3vSV2RqkAIzUEV2BHnUfKGyswWFPFwK5EeDo93K3FohSHbLAjj0s1Wzd+dg==}
+
+  jsonfile@6.1.0:
+    resolution: {integrity: sha512-5dgndWOriYSm5cnYaJNhalLNDKOqFwyDB/rr1E9ZsGciGvKPs8R2xYGCacuf3z6K1YKDz182fd+fY3cn3pMqXQ==}
+
+  klassijs-getsetter@git+https://git@github.com:klassijs/klassijs-getsetter.git#4fdc96cf7141bbda255c0a08e283c3afff5943c6:
+    resolution: {commit: 4fdc96cf7141bbda255c0a08e283c3afff5943c6, repo: git@github.com:klassijs/klassijs-getsetter.git, type: git}
+    version: 1.0.0
+
+  node-resemble-js@https://codeload.github.com/klassijs/klassijs-resembleJs/tar.gz/76b8749478e840ef627ac674861f8c402b833972:
+    resolution: {tarball: https://codeload.github.com/klassijs/klassijs-resembleJs/tar.gz/76b8749478e840ef627ac674861f8c402b833972}
+    version: 1.2.0
+
+  pngjs@7.0.0:
+    resolution: {integrity: sha512-LKWqWJRhstyYo9pGvgor/ivk2w94eSjE3RGVuzLGlr3NmD8bf7RcYGze1mNdEHRP6TRP6rMuDHk5t44hnTRyow==}
+    engines: {node: '>=14.19.0'}
+
+  universalify@2.0.1:
+    resolution: {integrity: sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw==}
+    engines: {node: '>= 10.0.0'}
+
+snapshots:
+
+  commander@12.1.0: {}
+
+  fs-extra@11.2.0:
+    dependencies:
+      graceful-fs: 4.2.11
+      jsonfile: 6.1.0
+      universalify: 2.0.1
+
+  graceful-fs@4.2.11: {}
+
+  jpeg-js@0.4.4: {}
+
+  jsonfile@6.1.0:
+    dependencies:
+      universalify: 2.0.1
+    optionalDependencies:
+      graceful-fs: 4.2.11
+
+  klassijs-getsetter@git+https://git@github.com:klassijs/klassijs-getsetter.git#4fdc96cf7141bbda255c0a08e283c3afff5943c6: {}
+
+  node-resemble-js@https://codeload.github.com/klassijs/klassijs-resembleJs/tar.gz/76b8749478e840ef627ac674861f8c402b833972:
+    dependencies:
+      jpeg-js: 0.4.4
+      pngjs: 7.0.0
+
+  pngjs@7.0.0: {}
+
+  universalify@2.0.1: {}
