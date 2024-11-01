@@ -26,7 +26,7 @@ class ImageAssertion {
   }
 
   async run() {
-    const envName = env.envName.toLowerCase();
+    const envName = process.env.envName.toLowerCase();
     const browserName = ASB.get('BROWSER_NAME');
     const baselineDir = `./visual-regression-baseline/${browserName}/${envName}/`;
     const resultDir = `./artifacts/visual-regression/original/${browserName}/${envName}/`;
@@ -155,7 +155,7 @@ class ImageAssertion {
 }
 
 async function takePageImage(filename, elementSnapshot = null, elementsToHide = null) {
-  const envName = env.envName.toLowerCase();
+  const envName = process.env.envName.toLowerCase();
   const browserName = ASB.get('BROWSER_NAME');
   const resultDir = `./artifacts/visual-regression/original/${browserName}/${envName}/`;
   const resultDirPositive = `${resultDir}positive/`;
