@@ -8,11 +8,8 @@
 require('dotenv').config();
 const resemble = require('klassijs-resembleJs');
 const fs = require('fs-extra');
-const { Command } = require('commander');
 const { ASB } = require('klassijs-getsetter');
 
-const program = new Command();
-const options = program.opts();
 let diffFile;
 
 class ImageAssertion {
@@ -125,7 +122,9 @@ class ImageAssertion {
       await browser.pause(DELAY_1s);
     }
 
-    if (err === true && options.updateBaselineImage) {
+    const baselineImageUpdate = ASB.get('baselineImageUpdate');
+    if (err === true && baselineImageUpdate === true) {
+      console.log('Condition met: err is true and options.updateBaselineImage is', baselineImageUpdate);
       console.log(
         `${this.message}   images at:\n` +
         `   Baseline: ${baselinePath}\n` +
@@ -140,6 +139,7 @@ class ImageAssertion {
         }
       });
     } else if (err) {
+      console.log('Condition not met: err is', err, 'and options.updateBaselineImage is', baselineImageUpdate);
       console.log(
         `${this.message}   images at:\n` +
         `   Baseline: ${baselinePath}\n` +
@@ -190,7 +190,6 @@ async function timeoutErrormsg(err) {
     console.error(err.message);
   }
 }
-
 
 /**
  * hideElemements hide elements
