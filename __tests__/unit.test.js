@@ -2,12 +2,12 @@
 require('dotenv').config();
 const fs = require('fs-extra');
 const resemble = require('klassijs-resembleJs');
-const { ASB } = require('klassijs-getsetter');
+const { astellen } = require('klassijs-astellen');
 const { ImageAssertion, takePageImage } = require('../src/imageCompare');
 
 jest.mock('fs-extra');
 jest.mock('klassijs-resembleJs');
-jest.mock('klassijs-getsetter');
+jest.mock('klassijs-astellen');
 
 // describe('ImageAssertion', () => {
 //   let imageAssertion;
@@ -16,7 +16,7 @@ jest.mock('klassijs-getsetter');
 //     imageAssertion = new ImageAssertion('test.png', 0.1, null, 0);
 //     process.env.ENV_NAME = 'test_env';
 //     process.env.envName = 'test_env';
-//     ASB.get = jest.fn().mockReturnValue('test_browser');
+//     astellen.get = jest.fn().mockReturnValue('test_browser');
 //
 //     valueMethodSpy = jest.spyOn(imageAssertion, 'valueMethod').mockImplementation(() => {
 //       console.log('valueMethod called');
@@ -61,7 +61,7 @@ describe('takePageImage', () => {
   beforeEach(() => {
     process.env.ENV_NAME = 'test_env';
     process.env.envName = 'test_env';
-    ASB.get = jest.fn().mockReturnValue('test_browser');
+    astellen.get = jest.fn().mockReturnValue('test_browser');
   });
 
   test('should save screenshot of the page', async () => {
@@ -94,7 +94,7 @@ describe('takePageImage', () => {
 // require('dotenv').config();
 // const fs = require('fs-extra');
 // const resemble = require('klassijs-resembleJs');
-// const { ASB } = require('klassijs-getsetter');
+// const { astellen } = require('klassijs-getsetter');
 // const { ImageAssertion, takePageImage } = require('../src/imageCompare');
 //
 // jest.mock('fs-extra');
@@ -110,7 +110,7 @@ describe('takePageImage', () => {
 //     imageAssertion = new ImageAssertion('test.png', 0.1, null, 0);
 //     process.env.ENV_NAME = 'test_env';
 //     process.env.envName = 'test_env';
-//     ASB.get = jest.fn().mockReturnValue('test_browser');
+//     astellen.get = jest.fn().mockReturnValue('test_browser');
 //
 //     valueMethodSpy = jest.spyOn(imageAssertion, 'valueMethod').mockImplementation(() => {
 //       console.log('valueMethod spy called');

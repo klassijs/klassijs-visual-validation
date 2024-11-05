@@ -36,7 +36,7 @@
   "dependencies": {
     "dotenv": "^16.4.5",
     "fs-extra": "^11.2.0",
-    "klassijs-getsetter": "github:klassijs/klassijs-getsetter",
+    "klassijs-astellen": "github:klassijs/klassijs-astellen",
     "klassijs-resembleJs": "github:klassijs/klassijs-resembleJs"
   },
   "devDependencies": {

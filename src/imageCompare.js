@@ -8,7 +8,7 @@
 require('dotenv').config();
 const resemble = require('klassijs-resembleJs');
 const fs = require('fs-extra');
-const { ASB } = require('klassijs-getsetter');
+const { astellen } = require('klassijs-astellen');
 
 let diffFile;
 
@@ -27,7 +27,7 @@ class ImageAssertion {
 
   async run() {
     const envName = env.envName.toLowerCase();
-    const browserName = ASB.get('BROWSER_NAME');
+    const browserName = astellen.get('BROWSER_NAME');
     const baselineDir = `./visual-regression-baseline/${browserName}/${envName}/`;
     const resultDir = `./artifacts/visual-regression/original/${browserName}/${envName}/`;
     const resultDirPositive = `${resultDir}positive/`;
@@ -122,7 +122,7 @@ class ImageAssertion {
       await browser.pause(DELAY_1s);
     }
 
-    const baselineImageUpdate = ASB.get('baselineImageUpdate');
+    const baselineImageUpdate = astellen.get('baselineImageUpdate');
     if (err === true && baselineImageUpdate === true) {
       console.log('Condition met: err is true and options.updateBaselineImage is', baselineImageUpdate);
       console.log(
@@ -156,7 +156,7 @@ class ImageAssertion {
 
 async function takePageImage(filename, elementSnapshot = null, elementsToHide = null) {
   const envName = env.envName.toLowerCase();
-  const browserName = ASB.get('BROWSER_NAME');
+  const browserName = astellen.get('BROWSER_NAME');
   const resultDir = `./artifacts/visual-regression/original/${browserName}/${envName}/`;
   const resultDirPositive = `${resultDir}positive/`;
 
