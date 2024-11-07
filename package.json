@@ -6,7 +6,8 @@
     "email": "larryg@klassitech.co.uk",
     "twitter": "https://twitter.com/larryG_01",
     "linkedin": "https://linkedin.com/in/larryg",
-    "youtube": "https://youtube.com/@LarryG_01"
+    "youtube": "https://youtube.com/@LarryG_01",
+    "github": "https://github.com/klassijs"
   },
   "contributors": [
     {
@@ -25,21 +26,12 @@
   },
   "main": "index.js",
   "scripts": {
-    "test": "jest"
-  },
-  "jest": {
-    "testMatch": [
-      "**/__tests__/**/*.js?(x)",
-      "**/?(*.)+(spec|test).js?(x)"
-    ]
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
     "fs-extra": "^11.2.0",
     "klassijs-astellen": "github:klassijs/klassijs-astellen",
     "klassijs-resembleJs": "github:klassijs/klassijs-resembleJs"
-  },
-  "devDependencies": {
-    "jest": "^29.7.0"
   }
 }

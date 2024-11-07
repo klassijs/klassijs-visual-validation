@@ -1,9 +1,5 @@
 /**
- * klassijs
- * Copyright © 2016 - Larry Goddard
-
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * Copyright © 2016 klassijs - Larry Goddard
  */
 require('dotenv').config();
 const resemble = require('klassijs-resembleJs');
@@ -38,8 +34,8 @@ class ImageAssertion {
     const diffDirNegative = `${diffDir}negative/`;
 
     const fileName = this.filename;
-    const baselinePath = `${baselineDir}${this.filename}`;
-    const resultPathPositive = `${resultDirPositive}${this.filename}`;
+    const baselinePath = `${baselineDir}${fileName}`;
+    const resultPathPositive = `${resultDirPositive}${fileName}`;
     fs.ensureDirSync(baselineDir);
     fs.ensureDirSync(diffDirPositive);
 
@@ -68,8 +64,8 @@ class ImageAssertion {
         .onComplete(async (res) => {
           try {
             this.result = await res;
-            await this.valueMethod(this.result, this.filename, resultDirNegative, resultDirPositive, diffDirNegative, diffDirPositive);
-            await this.passMethod(this.result, this.filename, baselineDir, resultDirNegative, diffFile, this.value);
+            await this.valueMethod(this.result, fileName, resultDirNegative, resultDirPositive, diffDirNegative, diffDirPositive);
+            await this.passMethod(this.result, fileName, baselineDir, resultDirNegative, diffFile, this.value);
           } catch (err) {
             console.error('Error during image comparison:', err);
           }
