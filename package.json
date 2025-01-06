@@ -1,10 +1,10 @@
 {
   "name": "klassijs-visual-validation",
   "version": "1.0.0",
+  "description": "Visual Validation is a powerful tool designed to compare two images and detect any differences between them.",
   "creator": {
     "name": "Larry Goddard",
     "email": "larryg@klassitech.co.uk",
-    "twitter": "https://twitter.com/larryG_01",
     "linkedin": "https://linkedin.com/in/larryg",
     "youtube": "https://youtube.com/@LarryG_01",
     "github": "https://github.com/klassijs"
@@ -31,7 +31,7 @@
   "dependencies": {
     "dotenv": "^16.4.5",
     "fs-extra": "^11.2.0",
-    "klassijs-astellen": "github:klassijs/klassijs-astellen",
+    "klassijs-astellen": "^1.0.0",
     "klassijs-resembleJs": "github:klassijs/klassijs-resembleJs"
   }
 }
