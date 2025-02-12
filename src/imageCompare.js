@@ -13,6 +13,8 @@ const { astellen } = require('klassijs-astellen');
 let diffFile;
 
 class ImageAssertion {
+  static mismatchedImages = [];
+
   constructor(filename, expected, result, value) {
     this.filename = filename;
     this.expected = expected;
@@ -109,7 +111,7 @@ class ImageAssertion {
     }
   }
 
-  async passMethod(result, filename, baselineDir, resultDirNegative, diffFile, value) {
+  async passMethod1(result, filename, baselineDir, resultDirNegative, diffFile, value) {
     value = parseFloat(result.misMatchPercentage);
     this.message = `image Match Failed for ${filename} with a tolerance difference of ${value - this.expected} - expected: ${this.expected} but got: ${value}`;
     const baselinePath = `${baselineDir}${filename}`;
@@ -152,6 +154,74 @@ class ImageAssertion {
       throw `${err} - ${this.message}`;
     }
   }
+
+  async passMethod(result, filename, baselineDir, resultDirNegative, diffFile, value) {
+    value = parseFloat(result.misMatchPercentage);
+    this.message = `image Match Failed for ${filename} with a tolerance difference of ${value - this.expected} - expected: ${this.expected} but got: ${value}`;
+    const baselinePath = `${baselineDir}${filename}`;
+    const resultPathNegative = `${resultDirNegative}${filename}`;
+    const pass = value <= this.expected;
+    const err = value > this.expected;
+
+    if (pass) {
+      console.log(`image Match for ${filename} with ${value}% difference.`);
+      await browser.pause(DELAY_1s);
+    }
+
+    const baselineImageUpdate = astellen.get('baselineImageUpdate');
+    if (err === true && baselineImageUpdate === true) {
+      console.log('Condition met: err is true and options.updateBaselineImage is', baselineImageUpdate);
+      console.log(
+        `${this.message}   images at:\n` +
+        `   Baseline: ${baselinePath}\n` +
+        `   Result: ${resultPathNegative}\n` +
+        `    cp ${resultPathNegative} ${baselinePath}`
+      );
+      await fs.copy(resultPathNegative, baselinePath, (err) => {
+        console.log(` All Baseline images have now been updated from: ${resultPathNegative}`);
+        if (err) {
+          console.error('The Baseline images were NOT updated: ', err.message);
+          throw err;
+        }
+      });
+    } else if (err) {
+      console.log('Condition not met: err is', err, 'and options.updateBaselineImage is', baselineImageUpdate);
+      console.log(
+        `${this.message}   images at:\n` +
+        `   Baseline: ${baselinePath}\n` +
+        `   Result: ${resultPathNegative}\n` +
+        `   Diff: ${diffFile}\n` +
+        `   Open ${diffFile} to see how the image has changed.\n` +
+        '   If the Resulting image is correct you can use it to update the Baseline image and re-run your test:\n' +
+        `    cp ${resultPathNegative} ${baselinePath}`
+      );
+      ImageAssertion.mismatchedImages.push({
+        filename,
+        baselinePath,
+        resultPathNegative,
+        diffFile,
+        message: this.message
+      });
+    }
+  }
+
+  static generateMismatchReport() {
+    if (ImageAssertion.mismatchedImages.length > 0) {
+      console.log('Mismatch Report:');
+      ImageAssertion.mismatchedImages.forEach((mismatch) => {
+        console.log(`Filename: ${mismatch.filename}`);
+        console.log(`Baseline: ${mismatch.baselinePath}`);
+        console.log(`Result: ${mismatch.resultPathNegative}`);
+        console.log(`Diff: ${mismatch.diffFile}`);
+        console.log(`Message: ${mismatch.message}`);
+        console.log('-----------------------------------');
+      });
+    } else {
+      console.log('No mismatched images found.');
+    }
+  }
+
+
 }
 
 async function takePageImage(filename, elementSnapshot = null, elementsToHide = null) {
