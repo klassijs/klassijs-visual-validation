@@ -19,4 +19,5 @@ out
 gen
 .DS_Store
 klassijs-visual-validation.iml
+*.tgz
 
