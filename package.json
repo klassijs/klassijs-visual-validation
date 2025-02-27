@@ -1,6 +1,6 @@
 {
   "name": "klassijs-visual-validation",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "creator": {
     "name": "Larry Goddard",
     "email": "larryg@klassitech.co.uk",
@@ -36,7 +36,7 @@
   "dependencies": {
     "dotenv": "^16.4.5",
     "fs-extra": "^11.2.0",
-    "klassijs-astellen": "github:klassijs/klassijs-astellen",
+    "klassijs-astellen": "^1.0.0",
     "klassijs-resembleJs": "github:klassijs/klassijs-resembleJs"
   },
   "devDependencies": {

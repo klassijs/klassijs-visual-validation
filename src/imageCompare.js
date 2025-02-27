@@ -59,7 +59,7 @@ class ImageAssertion {
     const diffDirPositive = `${diffDir}positive/`;
     const diffDirNegative = `${diffDir}negative/`;
 
-    const fileName = this.filename;
+    // const fileName = this.filename;
     const baselinePath = `${baselineDir}${this.filename}`;
     const resultPathPositive = `${resultDirPositive}${this.filename}`;
     fs.ensureDirSync(baselineDir);
@@ -176,8 +176,8 @@ class ImageAssertion {
         '   If the Resulting image is correct you can use it to update the Baseline image and re-run your test:\n' +
         `    cp ${resultPathNegative} ${baselinePath}`
       );
-      throw `${err} - ${this.message}`;
       errors.push({ error: err });
+      throw `${err} - ${this.message}`;
     }
   }
 
