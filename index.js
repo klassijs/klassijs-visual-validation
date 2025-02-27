@@ -1,6 +1,6 @@
 /**
  * Copyright © 2016 klassijs - Larry Goddard
  */
-const {takeImage, compareImage} = require('./utils/common');
+const {takeImage, compareImage, ImageAssertion} = require('./utils/common');
 
-module.exports = {takeImage, compareImage};
+module.exports = {takeImage, compareImage, ImageAssertion};

@@ -1,12 +1,40 @@
 /**
- * Copyright © 2016 klassijs - Larry Goddard
+ * klassijs
+ * Copyright © 2016 - Larry Goddard
+
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  */
 require('dotenv').config();
 const resemble = require('klassijs-resembleJs');
 const fs = require('fs-extra');
-const { astellen } = require('klassijs-astellen');
 
 let diffFile;
+let browserName = BROWSER_NAME || global.browserName;
+
+const errors = [];
+let consoleOutput = '';
+
+const originalConsoleError = console.error;
+console.error = function (message) {
+  consoleOutput += message + '\n';
+  originalConsoleError.apply(console, arguments);
+};
+
+function throwCollectedErrors() {
+  if (errors.length > 0) {
+    const formattedErrorMessages = errors.map(err => {
+      return err.message;
+    }).join('\n');
+    const fullErrorMessage = `${formattedErrorMessages}`;
+    const cleanConsoleOutput = consoleOutput.replace(/\x1b\[[0-9;]*m/g, ''); // Remove color codes
+    const consoleMessage = `<div style="color:red;">${fullErrorMessage}</div>\n${cleanConsoleOutput}`;
+    if (cucumberThis && cucumberThis.attach) {
+      cucumberThis.attach(`Attachment (text/plain): ${consoleMessage}`);
+    }
+    throw new Error(consoleMessage);
+  }
+}
 
 class ImageAssertion {
   constructor(filename, expected, result, value) {
@@ -23,25 +51,22 @@ class ImageAssertion {
 
   async run() {
     const envName = env.envName.toLowerCase();
-    const browserName = astellen.get('BROWSER_NAME');
     const baselineDir = `./visual-regression-baseline/${browserName}/${envName}/`;
     const resultDir = `./artifacts/visual-regression/original/${browserName}/${envName}/`;
     const resultDirPositive = `${resultDir}positive/`;
     const resultDirNegative = `${resultDir}negative/`;
-
     const diffDir = `./artifacts/visual-regression/diffs/${browserName}/${envName}/`;
     const diffDirPositive = `${diffDir}positive/`;
     const diffDirNegative = `${diffDir}negative/`;
 
-    const fileName = this.filename;
-    const baselinePath = `${baselineDir}${fileName}`;
-    const resultPathPositive = `${resultDirPositive}${fileName}`;
+    const baselinePath = `${baselineDir}${this.filename}`;
+    const resultPathPositive = `${resultDirPositive}${this.filename}`;
     fs.ensureDirSync(baselineDir);
     fs.ensureDirSync(diffDirPositive);
 
     if (!fs.existsSync(baselinePath)) {
-      console.log('\t WARNING: Baseline image does NOT exist.');
-      console.log(`\t Creating Baseline image from Result: ${baselinePath}`);
+      console.info('\t WARNING: Baseline image does NOT exist.');
+      console.info(`\t Creating Baseline image from Result: ${baselinePath}`);
       fs.writeFileSync(baselinePath, fs.readFileSync(resultPathPositive));
     }
 
@@ -64,14 +89,16 @@ class ImageAssertion {
         .onComplete(async (res) => {
           try {
             this.result = await res;
-            await this.valueMethod(this.result, fileName, resultDirNegative, resultDirPositive, diffDirNegative, diffDirPositive);
-            await this.passMethod(this.result, fileName, baselineDir, resultDirNegative, diffFile, this.value);
+            await this.valueMethod(this.result, this.filename, resultDirNegative, resultDirPositive, diffDirNegative, diffDirPositive);
+            await this.passMethod(this.result, this.filename, baselineDir, resultDirNegative, diffFile, this.value);
           } catch (err) {
-            console.error('Error during image comparison:', err);
+            console.error('❌ \x1b[31mImage comparison failure:\x1b[0m', err.message);
+            errors.push({ error: err});
           }
         });
     } catch (err) {
-      console.error('Error initiating image comparison:', err);
+      console.error(`❌ \x1b[31mError initiating image comparison:\x1b[0m`);
+      errors.push({ error: err});
     }
   }
 
@@ -93,7 +120,7 @@ class ImageAssertion {
       });
       fs.ensureDirSync(resultDirNegative);
       fs.removeSync(resultPathNegative);
-      fs.moveSync(resultPathPositive, resultPathNegative, false);
+      fs.copySync(resultPathPositive, resultPathNegative, false);
       console.log(`\t Create diff image [negative]: ${diffFile}`);
     } else {
       diffFile = `${diffDirPositive}${filename}`;
@@ -114,28 +141,31 @@ class ImageAssertion {
     const err = value > this.expected;
 
     if (pass) {
-      console.log(`image Match for ${filename} with ${value}% difference.`);
-      await browser.pause(DELAY_1s);
+      console.info(`✅ Image Match for ${filename} with ${value}% difference.`);
+    } else {
+      console.error(`\x1b[31m${this.message}\x1b[0m`);
+
+      if (cucumberThis && cucumberThis.attach) {
+        cucumberThis.attach(`<div style="color:red;">Match failed: ${this.message}</div>`, 'text/html');
+      }
     }
 
-    const baselineImageUpdate = astellen.get('baselineImageUpdate');
-    if (err === true && baselineImageUpdate === true) {
-      console.log('Condition met: err is true and options.updateBaselineImage is', baselineImageUpdate);
-      console.log(
+    const baselineImageUpdate = global.baselineImageUpdate;
+    if (!pass && baselineImageUpdate === true) {
+      console.info(
         `${this.message}   images at:\n` +
         `   Baseline: ${baselinePath}\n` +
         `   Result: ${resultPathNegative}\n` +
         `    cp ${resultPathNegative} ${baselinePath}`
       );
       await fs.copy(resultPathNegative, baselinePath, (err) => {
-        console.log(` All Baseline images have now been updated from: ${resultPathNegative}`);
+        console.info(` All Baseline images have now been updated from: ${resultPathNegative}`);
         if (err) {
-          console.error('The Baseline images were NOT updated: ', err.message);
-          throw err;
+          console.error(`❌ The Baseline images were NOT updated: ${err.message}`);
+          errors.push({ message: this.message });
         }
       });
     } else if (err) {
-      console.log('Condition not met: err is', err, 'and options.updateBaselineImage is', baselineImageUpdate);
       console.log(
         `${this.message}   images at:\n` +
         `   Baseline: ${baselinePath}\n` +
@@ -145,14 +175,24 @@ class ImageAssertion {
         '   If the Resulting image is correct you can use it to update the Baseline image and re-run your test:\n' +
         `    cp ${resultPathNegative} ${baselinePath}`
       );
+      errors.push({ error: err });
       throw `${err} - ${this.message}`;
+    }
+  }
+
+  static finalizeTest() {
+    if (errors.length > 0) {
+      throwCollectedErrors();
+      console.error('❌ Test run completed with failures...');
+    } else {
+      console.log('✅ Test run completed successfully...');
     }
   }
 }
 
+// takePageImage function to take a screenshot of the page
 async function takePageImage(filename, elementSnapshot = null, elementsToHide = null) {
   const envName = env.envName.toLowerCase();
-  const browserName = astellen.get('BROWSER_NAME');
   const resultDir = `./artifacts/visual-regression/original/${browserName}/${envName}/`;
   const resultDirPositive = `${resultDir}positive/`;
 

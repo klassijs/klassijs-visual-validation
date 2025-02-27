@@ -12,6 +12,7 @@ log
 
 # Dependency directories
 node_modules
+.git
 
 # IntelliJ project files
 .idea
@@ -21,3 +22,5 @@ gen
 klassijs-visual-validation.iml
 *.tgz
 
+*.tgz
+*.tar.gz

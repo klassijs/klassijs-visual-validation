@@ -26,4 +26,4 @@ async function takeImage(fileName, elementSnapshot, elementsToHide = ''){
     await takePageImage(fileName, elementSnapshot, elementsToHide);
 }
 
-module.exports = { compareImage, takeImage };
+module.exports = { compareImage, takeImage, ImageAssertion };
