@@ -22,3 +22,5 @@ gen
 klassijs-visual-validation.iml
 *.tgz
 
+*.tgz
+*.tar.gz
