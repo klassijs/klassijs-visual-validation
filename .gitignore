@@ -12,6 +12,7 @@ log
 
 # Dependency directories
 node_modules
+.git
 
 # IntelliJ project files
 .idea
