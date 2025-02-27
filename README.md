@@ -47,17 +47,17 @@ Here’s a simple example that demonstrates how to use the **Visual Validation**
 ```javascript
 const {takeImage, compareImage} = require('klassijs-visual-validation');
 
-async function validateVisualChanges() {
+async function validateVisualChanges(fileName, elementSnapshot, elementsToHide) {
     await takeImage(`${image}_1-0.png`);
     await compareImage(`${image}_1-0.png`);
 }
 
-validateVisualChanges();
+validateVisualChanges(fileName, elementSnapshot, elementsToHide);
 ```
 ## Advanced Options
 This allows for the taking images where it have dynamic content and then compare it with the reference image.
 ```javascript
-await takeImage(`${image}_inputBox.png`, searchData.elem.searchInput, null);
+await takeImage(`${image}_1-1.png`, null, elementsToHide);
 ```
 
 ## Contributing
