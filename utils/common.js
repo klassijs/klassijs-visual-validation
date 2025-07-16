@@ -14,16 +14,26 @@ async function compareImage(fileName){
 }
 
 /**
- * This take an image of a page or an element on a page
+ * This take an image of a page or an element on a page and optionally compares it with baseline
  * fileName only = a whole page image
  * fileName + elementSnapshot = take an image of an element on the page
  * @param fileName {string}
  * @param elementSnapshot {any}
  * @param elementsToHide {string}
+ * @param shouldCompare {boolean} - whether to perform comparison after taking image (default: true)
+ * @param expectedTolerance {number} - tolerance for comparison (default: 0.2)
  * @returns {Promise<void>}
  */
-async function takeImage(fileName, elementSnapshot, elementsToHide = ''){
+async function takeImage(fileName, elementSnapshot, elementsToHide = '', shouldCompare = true, expectedTolerance = 0.2){
     await takePageImage(fileName, elementSnapshot, elementsToHide);
+    
+    // Perform comparison if requested
+    if (shouldCompare) {
+        const result = null;
+        const value = null;
+        const imageAssertion = new ImageAssertion(fileName, expectedTolerance, result, value);
+        await imageAssertion.run();
+    }
 }
 
 module.exports = { compareImage, takeImage, ImageAssertion };

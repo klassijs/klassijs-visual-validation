@@ -9,6 +9,7 @@
 - **Image Comparison**: Compares two images to detect visual differences.
 - **Regressions Detection**: Ideal for detecting UI regressions where layout or visual changes might affect the user interface.
 - **Easy Integration**: Simple to integrate into your test automation framework.
+- **Single Function Call**: Take screenshots and compare them in one operation.
 
 ## Installation
 
@@ -30,34 +31,82 @@ Here's a guide on how to use **Visual Validation** in your project:
    const {takeImage, compareImage} = require('klassijs-visual-validation');
    ```
 
-2. **Perform Image Comparison**:
-   Use the `compareImages` method to compare two images:
+2. **Take Screenshot and Compare** (Recommended):
+   Use the `takeImage` method to take a screenshot and automatically compare it with the baseline:
    ```javascript
-   await takeImage(fileName, elementSnapshot, elementsToHide);
-   await compareImage('path/to/actual-image.png', 'path/to/reference-image.png');
+   await takeImage('screenshot.png');
    ```
 
-   The `compareImages` method will return a result indicating if any differences were found between the two images.
+   This single call will:
+   - Take a screenshot of the entire page
+   - Compare it with the baseline image
+   - Generate diff images if differences are found
+   - Log the comparison results
 
+3. **Advanced Usage Options**:
+   ```javascript
+   // Take screenshot of a specific element and compare
+   await takeImage('button.png', '.submit-button');
+   
+   // Hide elements during screenshot and compare
+   await takeImage('clean-page.png', null, '.header, .footer');
+   
+   // Take screenshot without comparison
+   await takeImage('screenshot.png', null, '', false);
+   
+   // Use custom tolerance for comparison
+   await takeImage('screenshot.png', null, '', true, 0.1);
+   ```
+
+4. **Separate Comparison** (Legacy):
+   If you need to perform comparison separately:
+   ```javascript
+   await takeImage(fileName, elementSnapshot, elementsToHide);
+   await compareImage('path/to/actual-image.png');
+   ```
 
 ## Example
 
-Here’s a simple example that demonstrates how to use the **Visual Validation** tool:
+Here's a simple example that demonstrates how to use the **Visual Validation** tool:
 
 ```javascript
-const {takeImage, compareImage} = require('klassijs-visual-validation');
+const {takeImage} = require('klassijs-visual-validation');
 
-async function validateVisualChanges(fileName, elementSnapshot, elementsToHide) {
-    await takeImage(`${image}_1-0.png`);
-    await compareImage(`${image}_1-0.png`);
+async function validateVisualChanges() {
+    // Take screenshot and compare with baseline in one call
+    await takeImage('homepage.png');
+    
+    // Take screenshot of specific element and compare
+    await takeImage('login-form.png', '.login-container');
+    
+    // Hide dynamic content and compare
+    await takeImage('clean-dashboard.png', null, '.user-info, .timestamp');
 }
 
-validateVisualChanges(fileName, elementSnapshot, elementsToHide);
+validateVisualChanges();
 ```
-## Advanced Options
-This allows for the taking images where it have dynamic content and then compare it with the reference image.
+
+## Function Parameters
+
+The `takeImage` function accepts the following parameters:
+
 ```javascript
-await takeImage(`${image}_1-1.png`, null, elementsToHide);
+takeImage(fileName, elementSnapshot, elementsToHide, shouldCompare, expectedTolerance)
+```
+
+- `fileName` (string, required): Name of the screenshot file
+- `elementSnapshot` (string, optional): CSS selector for specific element to screenshot
+- `elementsToHide` (string, optional): CSS selectors of elements to hide during screenshot
+- `shouldCompare` (boolean, optional): Whether to perform comparison (default: true)
+- `expectedTolerance` (number, optional): Tolerance for comparison (default: 0.2)
+
+## Advanced Options
+
+This allows for taking images where there is dynamic content and then comparing it with the reference image:
+
+```javascript
+// Hide dynamic elements like timestamps, user info, etc.
+await takeImage('dashboard.png', null, '.timestamp, .user-info, .notification');
 ```
 
 ## Contributing
