@@ -22,9 +22,13 @@ async function compareImage(fileName){
  * @param elementsToHide {string}
  * @param shouldCompare {boolean} - whether to perform comparison after taking image (default: true)
  * @param expectedTolerance {number} - tolerance for comparison (default: 0.2)
+ * @param waitBeforeCapture
  * @returns {Promise<void>}
  */
-async function takeImage(fileName, elementSnapshot, elementsToHide = '', shouldCompare = true, expectedTolerance = 0.2){
+async function takeImage(fileName, elementSnapshot, elementsToHide = '', shouldCompare = true, expectedTolerance = 0.2, waitBeforeCapture = 100) {
+    if (waitBeforeCapture > 0) {
+        await browser.pause(waitBeforeCapture);
+    }
     await takePageImage(fileName, elementSnapshot, elementsToHide);
     
     // Perform comparison if requested
