@@ -10,6 +10,7 @@
 - **Regressions Detection**: Ideal for detecting UI regressions where layout or visual changes might affect the user interface.
 - **Easy Integration**: Simple to integrate into your test automation framework.
 - **Single Function Call**: Take screenshots and compare them in one operation.
+- **WebDriver Mode Detection**: Automatically detects and handles both W3C and Classic WebDriver modes for maximum compatibility.
 
 ## Installation
 
@@ -108,6 +109,24 @@ This allows for taking images where there is dynamic content and then comparing 
 // Hide dynamic elements like timestamps, user info, etc.
 await takeImage('dashboard.png', null, '.timestamp, .user-info, .notification');
 ```
+
+## WebDriver Mode Detection
+
+The tool now automatically detects whether your WebDriver is running in **W3C** or **Classic** mode and adjusts the screenshot behavior accordingly:
+
+- **W3C Mode**: Uses callback-based screenshot methods for modern WebDriver implementations
+- **Classic Mode**: Uses synchronous screenshot methods for legacy WebDriver implementations
+- **Fallback Detection**: Automatically falls back to alternative methods if the primary approach fails
+
+This ensures compatibility with:
+- Selenium 4+ (W3C mode)
+- Selenium 3.x (Classic mode)
+- Appium
+- BrowserStack
+- Sauce Labs
+- And other WebDriver-compatible services
+
+The detection is automatic and requires no configuration changes in your existing code.
 
 ## Contributing
 
