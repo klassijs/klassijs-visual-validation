@@ -27,7 +27,7 @@ const DELAY_500ms = 500;
 function withTimeout(promise, timeoutMs, operationName) {
   return Promise.race([
     promise,
-    new Promise((_, reject) => 
+    new Promise((_, reject) =>
       setTimeout(() => reject(new Error(`${operationName} timed out after ${timeoutMs}ms`)), timeoutMs)
     )
   ]);
@@ -52,17 +52,17 @@ function detectWebDriverMode() {
     if (typeof browser !== 'undefined' && browser.isW3C !== undefined) {
       return browser.isW3C ? 'W3C' : 'Classic';
     }
-    
+
     // Fallback: check for W3C capabilities
     if (typeof browser !== 'undefined' && browser.capabilities) {
       // Check for W3C capabilities
-      if (browser.capabilities['webdriver.remote.sessionid'] || 
-          browser.capabilities['ms:edgeOptions'] ||
-          browser.capabilities['goog:chromeOptions']) {
+      if (browser.capabilities['webdriver.remote.sessionid'] ||
+        browser.capabilities['ms:edgeOptions'] ||
+        browser.capabilities['goog:chromeOptions']) {
         return 'W3C';
       }
     }
-    
+
     // Default to Classic if we can't determine
     console.warn('Could not determine WebDriver mode, defaulting to Classic');
     return 'Classic';
@@ -81,16 +81,16 @@ function detectWebDriverMode() {
 async function takeScreenshotWithModeDetection(resultPathPositive, elementSelector = null) {
   const webDriverMode = detectWebDriverMode();
   console.log(`\t WebDriver running in ${webDriverMode} mode`);
-  
+
   try {
     if (elementSelector) {
       // Element screenshot
       let elem = await browser.$(elementSelector);
-      
+
       if (webDriverMode === 'W3C') {
         // W3C mode - try multiple approaches
         console.log(`\t Taking element screenshot using W3C mode`);
-        
+
         try {
           // First try: direct method (some W3C implementations work better with this)
           console.log(`\t Trying direct method first...`);
@@ -98,7 +98,7 @@ async function takeScreenshotWithModeDetection(resultPathPositive, elementSelect
           console.log(`\t Direct method succeeded`);
         } catch (directError) {
           console.log(`\t Direct method failed, trying callback approach: ${directError.message}`);
-          
+
           // Second try: callback approach with timeout
           try {
             await Promise.race([
@@ -111,7 +111,7 @@ async function takeScreenshotWithModeDetection(resultPathPositive, elementSelect
                   }
                 });
               }),
-              new Promise((_, reject) => 
+              new Promise((_, reject) =>
                 setTimeout(() => reject(new Error('Screenshot timeout')), 10000)
               )
             ]);
@@ -131,7 +131,7 @@ async function takeScreenshotWithModeDetection(resultPathPositive, elementSelect
       if (webDriverMode === 'W3C') {
         // W3C mode - try multiple approaches
         console.log(`\t Taking page screenshot using W3C mode`);
-        
+
         try {
           // First try: direct method (some W3C implementations work better with this)
           console.log(`\t Trying direct method first...`);
@@ -139,7 +139,7 @@ async function takeScreenshotWithModeDetection(resultPathPositive, elementSelect
           console.log(`\t Direct method succeeded`);
         } catch (directError) {
           console.log(`\t Direct method failed, trying callback approach: ${directError.message}`);
-          
+
           // Second try: callback approach with timeout
           try {
             await Promise.race([
@@ -152,7 +152,7 @@ async function takeScreenshotWithModeDetection(resultPathPositive, elementSelect
                   }
                 });
               }),
-              new Promise((_, reject) => 
+              new Promise((_, reject) =>
                 setTimeout(() => reject(new Error('Screenshot timeout')), 10000)
               )
             ]);
@@ -168,11 +168,11 @@ async function takeScreenshotWithModeDetection(resultPathPositive, elementSelect
         await browser.saveScreenshot(resultPathPositive);
       }
     }
-    
+
     console.log(`\t Screenshot taken successfully using ${webDriverMode} mode`);
   } catch (error) {
     console.warn(`Primary screenshot method failed (${error.message}), attempting fallback...`);
-    
+
     // Fallback: try alternative approach
     try {
       if (elementSelector) {
@@ -208,9 +208,9 @@ function throwCollectedErrors() {
         }
       }
       // Fallback for other error types
-      return errObj && typeof errObj === 'string' ? errObj : 
-             errObj && typeof errObj === 'number' ? `Error code: ${errObj}` : 
-             'Unknown error occurred';
+      return errObj && typeof errObj === 'string' ? errObj :
+        errObj && typeof errObj === 'number' ? `Error code: ${errObj}` :
+          'Unknown error occurred';
     }).join('\n');
     const fullErrorMessage = `${formattedErrorMessages}`;
     const cleanConsoleOutput = consoleOutput.replace(/\x1b\[[0-9;]*m/g, ''); // Remove color codes
@@ -218,6 +218,7 @@ function throwCollectedErrors() {
     if (cucumberThis && cucumberThis.attach) {
       cucumberThis.attach(`Attachment (text/plain): ${consoleMessage}`);
     }
+    errors.length = 0;
     throw new Error(consoleMessage);
   }
 }
@@ -283,22 +284,22 @@ class ImageAssertion {
             await this.passMethod(this.result, this.filename, baselineDir, resultDirNegative, diffFile, this.value);
           } catch (err) {
             // Handle different types of errors properly
-            const errorMessage = err && typeof err === 'object' && err.message ? err.message : 
-                               err && typeof err === 'string' ? err : 
-                               err && typeof err === 'number' ? `Error code: ${err}` : 
-                               'Unknown error occurred';
-            
+            const errorMessage = err && typeof err === 'object' && err.message ? err.message :
+              err && typeof err === 'string' ? err :
+                err && typeof err === 'number' ? `Error code: ${err}` :
+                  'Unknown error occurred';
+
             console.error('❌ \x1b[31mImage comparison failure:\x1b[0m', errorMessage);
             errors.push({ error: err, message: errorMessage });
           }
         });
     } catch (err) {
       // Handle different types of errors properly
-      const errorMessage = err && typeof err === 'object' && err.message ? err.message : 
-                         err && typeof err === 'string' ? err : 
-                         err && typeof err === 'number' ? `Error code: ${err}` : 
-                         'Unknown error occurred';
-      
+      const errorMessage = err && typeof err === 'object' && err.message ? err.message :
+        err && typeof err === 'string' ? err :
+          err && typeof err === 'number' ? `Error code: ${err}` :
+            'Unknown error occurred';
+
       console.error(`❌ \x1b[31mError initiating image comparison:\x1b[0m ${errorMessage}`);
       errors.push({ error: err, message: errorMessage });
     }
@@ -363,10 +364,10 @@ class ImageAssertion {
       await fs.copy(resultPathNegative, baselinePath, (err) => {
         console.info(` All Baseline images have now been updated from: ${resultPathNegative}`);
         if (err) {
-          const errorMessage = err && typeof err === 'object' && err.message ? err.message : 
-                             err && typeof err === 'string' ? err : 
-                             err && typeof err === 'number' ? `Error code: ${err}` : 
-                             'Unknown error occurred';
+          const errorMessage = err && typeof err === 'object' && err.message ? err.message :
+            err && typeof err === 'string' ? err :
+              err && typeof err === 'number' ? `Error code: ${err}` :
+                'Unknown error occurred';
           console.error(`❌ The Baseline images were NOT updated: ${errorMessage}`);
           errors.push({ error: err, message: errorMessage });
         }
@@ -413,10 +414,10 @@ async function takePageImage(filename, elementSnapshot = null, elementsToHide = 
     // Use the new mode-aware screenshot function
     await takeScreenshotWithModeDetection(resultPathPositive, elementSnapshot);
   } catch (error) {
-    const errorMessage = error && typeof error === 'object' && error.message ? error.message : 
-                       error && typeof error === 'string' ? error : 
-                       error && typeof error === 'number' ? `Error code: ${error}` : 
-                       'Unknown error occurred';
+    const errorMessage = error && typeof error === 'object' && error.message ? error.message :
+      error && typeof error === 'string' ? error :
+        error && typeof error === 'number' ? `Error code: ${error}` :
+          'Unknown error occurred';
     console.error(`Failed to take screenshot: ${errorMessage}`);
     throw error;
   }
@@ -430,10 +431,10 @@ async function takePageImage(filename, elementSnapshot = null, elementsToHide = 
 async function timeoutErrormsg(err) {
   await browser.pause(DELAY_500ms);
   if (err) {
-    const errorMessage = err && typeof err === 'object' && err.message ? err.message : 
-                       err && typeof err === 'string' ? err : 
-                       err && typeof err === 'number' ? `Error code: ${err}` : 
-                       'Unknown error occurred';
+    const errorMessage = err && typeof err === 'object' && err.message ? err.message :
+      err && typeof err === 'string' ? err :
+        err && typeof err === 'number' ? `Error code: ${err}` :
+          'Unknown error occurred';
     console.error(errorMessage);
   }
 }
