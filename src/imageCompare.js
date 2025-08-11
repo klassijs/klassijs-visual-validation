@@ -60,7 +60,6 @@ async function takeScreenshotImage(resultPathPositive, elementSelector = null) {
       await elem.saveScreenshot(resultPathPositive);
     } else {
       // Page screenshot using W3C mode
-      
       // Use direct Promise-based approach for WebdriverIO v9+
       await browser.saveScreenshot(resultPathPositive);
     }
@@ -119,9 +118,6 @@ class ImageAssertion {
   }
 
   async run() {
-    // Don't clear errors here - let them accumulate for the entire test
-    // clearErrors();
-    
     const envName = env.envName.toLowerCase();
     const baselineDir = `./visual-regression-baseline/${browserName}/${envName}/`;
     const resultDir = `./artifacts/visual-regression/original/${browserName}/${envName}/`;
@@ -165,7 +161,7 @@ class ImageAssertion {
             await this.valueMethod(this.result, this.filename, resultDirNegative, resultDirPositive, diffDirNegative, diffDirPositive);
             await this.passMethod(this.result, this.filename, baselineDir, resultDirNegative, diffFile, this.value);
           } catch (err) {
-            // Handle different types of errors properly
+            // Handle different types of errors
             const errorMessage = err && typeof err === 'object' && err.message ? err.message : 
                                err && typeof err === 'string' ? err : 
                                err && typeof err === 'number' ? `Error code: ${err}` : 
@@ -177,7 +173,7 @@ class ImageAssertion {
           }
         });
     } catch (err) {
-      // Handle different types of errors properly
+      // Handle different types of errors
       const errorMessage = err && typeof err === 'object' && err.message ? err.message : 
                          err && typeof err === 'string' ? err : 
                          err && typeof err === 'number' ? `Error code: ${err}` : 
@@ -235,10 +231,6 @@ class ImageAssertion {
     } else {
       // Only log to console, don't clutter Cucumber report
       console.error(`Image match failed: ${this.message}`);
-
-      // if (cucumberThis && cucumberThis.attach) {
-      //   cucumberThis.attach(`<div style="color:red;">Match failed: ${this.message}</div>`, 'text/html');
-      // }
     }
 
     const baselineImageUpdate = global.baselineImageUpdate;
@@ -287,9 +279,6 @@ class ImageAssertion {
 
 // takePageImage function to take a screenshot of the page
 async function takePageImage(filename, elementSnapshot = null, elementsToHide = null) {
-  // Don't clear errors here - this function is called for each image comparison
-  // clearErrors();
-  
   const envName = env.envName.toLowerCase();
   const resultDir = `./artifacts/visual-regression/original/${browserName}/${envName}/`;
   const resultDirPositive = `${resultDir}positive/`;
