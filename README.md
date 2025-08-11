@@ -10,7 +10,9 @@
 - **Regressions Detection**: Ideal for detecting UI regressions where layout or visual changes might affect the user interface.
 - **Easy Integration**: Simple to integrate into your test automation framework.
 - **Single Function Call**: Take screenshots and compare them in one operation.
-- **WebDriver Mode Detection**: Automatically detects and handles both W3C and Classic WebDriver modes for maximum compatibility.
+- **W3C Mode Optimized**: Optimized for modern W3C WebDriver implementations with direct Promise-based screenshot methods.
+- **Test Isolation**: Automatic error isolation between test runs to prevent cross-test contamination.
+- **Clean Reporting**: Professional Cucumber report integration with focused error messages.
 
 ## Installation
 
@@ -26,54 +28,69 @@ To add the **Visual Validation** tool to your project, you can use **pnpm**:
 
 Here's a guide on how to use **Visual Validation** in your project:
 
-1. **Import the Tool**:
-   Import the `visual-validation` module into your code:
-   ```javascript
-   const {takeImage, compareImage} = require('klassijs-visual-validation');
-   ```
+### 1. **Start a New Test Run** (Important!)
+Before running your visual validation tests, call this once at the start of your test suite:
+```javascript
+const { startNewTestRun } = require('klassijs-visual-validation');
 
-2. **Take Screenshot and Compare** (Recommended):
-   Use the `takeImage` method to take a screenshot and automatically compare it with the baseline:
-   ```javascript
-   await takeImage('screenshot.png');
-   ```
+// Call this once at the start of your test suite
+startNewTestRun();
+```
 
-   This single call will:
-   - Take a screenshot of the entire page
-   - Compare it with the baseline image
-   - Generate diff images if differences are found
-   - Log the comparison results
+### 2. **Import the Tool**:
+Import the `visual-validation` module into your code:
+```javascript
+const { takeImage, compareImage, ImageAssertion, clearErrors, startNewTestRun } = require('klassijs-visual-validation');
+```
 
-3. **Advanced Usage Options**:
-   ```javascript
-   // Take screenshot of a specific element and compare
-   await takeImage('button.png', '.submit-button');
-   
-   // Hide elements during screenshot and compare
-   await takeImage('clean-page.png', null, '.header, .footer');
-   
-   // Take screenshot without comparison
-   await takeImage('screenshot.png', null, '', false);
-   
-   // Use custom tolerance for comparison
-   await takeImage('screenshot.png', null, '', true, 0.1);
-   ```
+### 3. **Take Screenshot and Compare** (Recommended):
+Use the `takeImage` method to take a screenshot and automatically compare it with the baseline:
+```javascript
+await takeImage('screenshot.png');
+```
 
-4. **Separate Comparison** (Legacy):
-   If you need to perform comparison separately:
-   ```javascript
-   await takeImage(fileName, elementSnapshot, elementsToHide);
-   await compareImage('path/to/actual-image.png');
-   ```
+This single call will:
+- Take a screenshot of the entire page
+- Compare it with the baseline image
+- Generate diff images if differences are found
+- Log the comparison results
+
+### 4. **Advanced Usage Options**:
+```javascript
+// Take screenshot of a specific element and compare
+await takeImage('button.png', '.submit-button');
+
+// Hide elements during screenshot and compare
+await takeImage('clean-page.png', null, '.header, .footer');
+
+// Take screenshot without comparison
+await takeImage('screenshot.png', null, '', false);
+
+// Use custom tolerance for comparison
+await takeImage('screenshot.png', null, '', true, 0.1);
+
+// Add wait time before capture
+await takeImage('screenshot.png', null, '', true, 0.2, 500);
+```
+
+### 5. **Separate Comparison** (Legacy):
+If you need to perform comparison separately:
+```javascript
+await takeImage(fileName, elementSnapshot, elementsToHide);
+await compareImage('path/to/actual-image.png');
+```
 
 ## Example
 
-Here's a simple example that demonstrates how to use the **Visual Validation** tool:
+Here's a complete example that demonstrates how to use the **Visual Validation** tool:
 
 ```javascript
-const {takeImage} = require('klassijs-visual-validation');
+const { takeImage, startNewTestRun } = require('klassijs-visual-validation');
 
 async function validateVisualChanges() {
+    // Start a new test run (call this once at the start)
+    startNewTestRun();
+    
     // Take screenshot and compare with baseline in one call
     await takeImage('homepage.png');
     
@@ -82,6 +99,12 @@ async function validateVisualChanges() {
     
     // Hide dynamic content and compare
     await takeImage('clean-dashboard.png', null, '.user-info, .timestamp');
+    
+    // Multiple images in sequence (all errors will be collected)
+    await takeImage('mango_1-0.png');
+    await takeImage('mango_2-0.png');
+    await takeImage('mango_3-0.png');
+    await takeImage('mango_4-0.png');
 }
 
 validateVisualChanges();
@@ -89,10 +112,9 @@ validateVisualChanges();
 
 ## Function Parameters
 
-The `takeImage` function accepts the following parameters:
-
+### `takeImage` Function:
 ```javascript
-takeImage(fileName, elementSnapshot, elementsToHide, shouldCompare, expectedTolerance)
+takeImage(fileName, elementSnapshot, elementsToHide, shouldCompare, expectedTolerance, waitBeforeCapture)
 ```
 
 - `fileName` (string, required): Name of the screenshot file
@@ -100,33 +122,74 @@ takeImage(fileName, elementSnapshot, elementsToHide, shouldCompare, expectedTole
 - `elementsToHide` (string, optional): CSS selectors of elements to hide during screenshot
 - `shouldCompare` (boolean, optional): Whether to perform comparison (default: true)
 - `expectedTolerance` (number, optional): Tolerance for comparison (default: 0.2)
+- `waitBeforeCapture` (number, optional): Wait time in milliseconds before taking screenshot (default: 100)
+
+### `startNewTestRun` Function:
+```javascript
+startNewTestRun()
+```
+- Call this once at the start of your test suite
+- Ensures a clean errors array for the entire test run
+- Prevents cross-test error contamination
+
+### `clearErrors` Function:
+```javascript
+clearErrors()
+```
+- Manually clear the errors array if needed
+- Useful for custom error handling scenarios
 
 ## Advanced Options
 
-This allows for taking images where there is dynamic content and then comparing it with the reference image:
-
+### Dynamic Content Handling:
 ```javascript
 // Hide dynamic elements like timestamps, user info, etc.
 await takeImage('dashboard.png', null, '.timestamp, .user-info, .notification');
 ```
 
-## WebDriver Mode Detection
+### Custom Tolerance:
+```javascript
+// Use different tolerance for different types of content
+await takeImage('text-content.png', null, '', true, 0.1);  // Strict tolerance
+await takeImage('image-content.png', null, '', true, 0.5); // Relaxed tolerance
+```
 
-The tool now automatically detects whether your WebDriver is running in **W3C** or **Classic** mode and adjusts the screenshot behavior accordingly:
+### Element-Specific Screenshots:
+```javascript
+// Screenshot specific elements for focused testing
+await takeImage('header.png', '.site-header');
+await takeImage('footer.png', '.site-footer');
+await takeImage('navigation.png', '.main-nav');
+```
 
-- **W3C Mode**: Uses callback-based screenshot methods for modern WebDriver implementations
-- **Classic Mode**: Uses synchronous screenshot methods for legacy WebDriver implementations
-- **Fallback Detection**: Automatically falls back to alternative methods if the primary approach fails
+## WebDriver Mode
 
-This ensures compatibility with:
-- Selenium 4+ (W3C mode)
-- Selenium 3.x (Classic mode)
-- Appium
-- BrowserStack
-- Sauce Labs
-- And other WebDriver-compatible services
+The tool is optimized for **W3C mode** WebDriver implementations, which is the modern standard for browser automation.
 
-The detection is automatic and requires no configuration changes in your existing code.
+**W3C Mode Features:**
+- Uses direct Promise-based screenshot methods for optimal performance
+- Compatible with modern WebDriver implementations
+- Optimized for WebdriverIO v9+, Selenium 4+, Appium, BrowserStack, Sauce Labs, and other modern services
+- No callback complexity or mode detection overhead
+
+**Note:** This tool is designed for W3C mode WebDriver implementations. If you're using legacy Classic mode WebDriver, you may need to upgrade to a W3C-compatible version.
+
+## Error Handling and Reporting
+
+### Automatic Error Collection:
+- All image comparison failures are automatically collected
+- Errors are isolated between test runs
+- Comprehensive error reporting at the end of each test
+
+### Cucumber Integration:
+- Clean, professional error messages in Cucumber reports
+- No debug console clutter in reports
+- Focused error information for stakeholders
+
+### Test Isolation:
+- Each test run starts with a clean errors array
+- No cross-test error contamination
+- Professional test framework behavior
 
 ## Contributing
 
