@@ -9,8 +9,13 @@ require('dotenv').config();
 const resemble = require('klassijs-resembleJs');
 const fs = require('fs-extra');
 
+
 let diffFile;
 let browserName = BROWSER_NAME || global.browserName;
+
+// Constants for delays
+const DELAY_100ms = 100;
+const DELAY_500ms = 500;
 
 const errors = [];
 let consoleOutput = '';
@@ -21,21 +26,84 @@ console.error = function (message) {
   originalConsoleError.apply(console, arguments);
 };
 
+/**
+ * Start a new test run - call this once at the start of your test suite
+ * This ensures a clean errors array for the entire test run
+ */
+function startNewTestRun() {
+  clearErrors();
+  console.info('Starting new visual validation test run');
+}
+
+/**
+ * Clear the errors array to start fresh for each test
+ * This ensures test isolation and prevents errors from carrying over
+ */
+function clearErrors() {
+  errors.length = 0;
+  consoleOutput = '';
+}
+
+/**
+ * Take screenshot using W3C mode only
+ * @param {string} resultPathPositive - Path to save the screenshot
+ * @param {string} elementSelector - CSS selector for element screenshot (optional)
+ * @returns {Promise<void>}
+ */
+async function takeScreenshotImage(resultPathPositive, elementSelector = null) {
+  try {
+    if (elementSelector) {
+      // Element screenshot using W3C mode
+      let elem = await browser.$(elementSelector);
+      
+      // Use direct Promise-based approach for WebdriverIO v9+
+      await elem.saveScreenshot(resultPathPositive);
+    } else {
+      // Page screenshot using W3C mode
+      // Use direct Promise-based approach for WebdriverIO v9+
+      await browser.saveScreenshot(resultPathPositive);
+    }
+  } catch (error) {
+    console.error(`Screenshot failed: ${error.message}`);
+    throw new Error(`Unable to take screenshot: ${error.message}`);
+  }
+}
+
 function throwCollectedErrors() {
   if (errors.length > 0) {
-    const formattedErrorMessages = errors.map(err => {
-      return err.message;
+    const formattedErrorMessages = errors.map(errObj => {
+      // Handle different error object structures
+      if (errObj && typeof errObj === 'object') {
+        if (errObj.message) {
+          return errObj.message;
+        } else if (errObj.error) {
+          // Handle the case where we have { error: err, message: errorMessage }
+          if (typeof errObj.error === 'string') {
+            return errObj.error;
+          } else if (errObj.error && typeof errObj.error === 'object' && errObj.error.message) {
+            return errObj.error.message;
+          }
+        }
+      }
+      // Fallback for other error types
+      return errObj && typeof errObj === 'string' ? errObj : 
+             errObj && typeof errObj === 'number' ? `Error code: ${errObj}` : 
+             'Unknown error occurred';
     }).join('\n');
-    const fullErrorMessage = `${formattedErrorMessages}`;
-    const cleanConsoleOutput = consoleOutput.replace(/\x1b\[[0-9;]*m/g, ''); // Remove color codes
-    const consoleMessage = `<div style="color:red;">${fullErrorMessage}</div>\n${cleanConsoleOutput}`;
+    
+    // Only include the essential error messages, not all console output
+    const consoleMessage = `<div style="color:red;">${formattedErrorMessages}</div>`;
     if (cucumberThis && cucumberThis.attach) {
       cucumberThis.attach(`Attachment (text/plain): ${consoleMessage}`);
     }
+    errors.length = 0;
     throw new Error(consoleMessage);
   }
 }
 
+/**
+ * ImageAssertion class for visual regression testing
+ */
 class ImageAssertion {
   constructor(filename, expected, result, value) {
     this.filename = filename;
@@ -56,6 +124,7 @@ class ImageAssertion {
     const resultDirPositive = `${resultDir}positive/`;
     const resultDirNegative = `${resultDir}negative/`;
     const diffDir = `./artifacts/visual-regression/diffs/${browserName}/${envName}/`;
+
     const diffDirPositive = `${diffDir}positive/`;
     const diffDirNegative = `${diffDir}negative/`;
 
@@ -65,8 +134,8 @@ class ImageAssertion {
     fs.ensureDirSync(diffDirPositive);
 
     if (!fs.existsSync(baselinePath)) {
-      console.info('\t WARNING: Baseline image does NOT exist.');
-      console.info(`\t Creating Baseline image from Result: ${baselinePath}`);
+      // Only log to console, don't clutter Cucumber report
+      console.info(`Baseline image created: ${baselinePath}`);
       fs.writeFileSync(baselinePath, fs.readFileSync(resultPathPositive));
     }
 
@@ -92,13 +161,27 @@ class ImageAssertion {
             await this.valueMethod(this.result, this.filename, resultDirNegative, resultDirPositive, diffDirNegative, diffDirPositive);
             await this.passMethod(this.result, this.filename, baselineDir, resultDirNegative, diffFile, this.value);
           } catch (err) {
-            console.error('❌ \x1b[31mImage comparison failure:\x1b[0m', err.message);
-            errors.push({ error: err});
+            // Handle different types of errors
+            const errorMessage = err && typeof err === 'object' && err.message ? err.message : 
+                               err && typeof err === 'string' ? err : 
+                               err && typeof err === 'number' ? `Error code: ${err}` : 
+                               'Unknown error occurred';
+            
+            // Only log to console, don't clutter Cucumber report
+            console.error('Image comparison failure:', errorMessage);
+            errors.push({ error: err, message: errorMessage });
           }
         });
     } catch (err) {
-      console.error(`❌ \x1b[31mError initiating image comparison:\x1b[0m`);
-      errors.push({ error: err});
+      // Handle different types of errors
+      const errorMessage = err && typeof err === 'object' && err.message ? err.message : 
+                         err && typeof err === 'string' ? err : 
+                         err && typeof err === 'number' ? `Error code: ${err}` : 
+                         'Unknown error occurred';
+      
+      // Only log to console, don't clutter Cucumber report
+      console.error(`Error initiating image comparison: ${errorMessage}`);
+      errors.push({ error: err, message: errorMessage });
     }
   }
 
@@ -116,18 +199,21 @@ class ImageAssertion {
       const writeStream = fs.createWriteStream(diffFile);
       await result.getDiffImage().pack().pipe(writeStream);
       writeStream.on('error', (err) => {
-        console.log('this is the writeStream error ', err);
+        // Only log to console, don't clutter Cucumber report
+        console.error('WriteStream error:', err.message);
       });
       fs.ensureDirSync(resultDirNegative);
       fs.removeSync(resultPathNegative);
       fs.copySync(resultPathPositive, resultPathNegative, false);
-      console.log(`\t Create diff image [negative]: ${diffFile}`);
+      // Only log to console, don't clutter Cucumber report
+      console.info(`Diff image created: ${diffFile}`);
     } else {
       diffFile = `${diffDirPositive}${filename}`;
       const writeStream = fs.createWriteStream(diffFile);
       result.getDiffImage().pack().pipe(writeStream);
       writeStream.on('error', (err) => {
-        console.log('this is the writeStream error ', err);
+        // Only log to console, don't clutter Cucumber report
+        console.error('WriteStream error:', err.message);
       });
     }
   }
@@ -138,16 +224,13 @@ class ImageAssertion {
     const baselinePath = `${baselineDir}${filename}`;
     const resultPathNegative = `${resultDirNegative}${filename}`;
     const pass = value <= this.expected;
-    const err = value > this.expected;
 
     if (pass) {
-      console.info(`✅ Image Match for ${filename} with ${value}% difference.`);
+      // Only log to console, don't clutter Cucumber report
+      console.info(`Image match passed: ${filename} with ${value}% difference`);
     } else {
-      console.error(`\x1b[31m${this.message}\x1b[0m`);
-
-      if (cucumberThis && cucumberThis.attach) {
-        cucumberThis.attach(`<div style="color:red;">Match failed: ${this.message}</div>`, 'text/html');
-      }
+      // Only log to console, don't clutter Cucumber report
+      console.error(`Image match failed: ${this.message}`);
     }
 
     const baselineImageUpdate = global.baselineImageUpdate;
@@ -159,33 +242,37 @@ class ImageAssertion {
         `    cp ${resultPathNegative} ${baselinePath}`
       );
       await fs.copy(resultPathNegative, baselinePath, (err) => {
-        console.info(` All Baseline images have now been updated from: ${resultPathNegative}`);
+        // Only log to console, don't clutter Cucumber report
+        console.info(`Baseline images updated from: ${resultPathNegative}`);
         if (err) {
-          console.error(`❌ The Baseline images were NOT updated: ${err.message}`);
-          errors.push({ message: this.message });
+          const errorMessage = err && typeof err === 'object' && err.message ? err.message : 
+                             err && typeof err === 'string' ? err : 
+                             err && typeof err === 'number' ? `Error code: ${err}` : 
+                             'Unknown error occurred';
+          console.error(`Baseline images update failed: ${errorMessage}`);
+          errors.push({ error: err, message: errorMessage });
         }
       });
-    } else if (err) {
-      console.log(
-        `${this.message}   images at:\n` +
-        `   Baseline: ${baselinePath}\n` +
-        `   Result: ${resultPathNegative}\n` +
-        `   Diff: ${diffFile}\n` +
-        `   Open ${diffFile} to see how the image has changed.\n` +
-        '   If the Resulting image is correct you can use it to update the Baseline image and re-run your test:\n' +
-        `    cp ${resultPathNegative} ${baselinePath}`
-      );
-      errors.push({ error: err });
-      throw `${err} - ${this.message}`;
+    } else if (!pass) {
+      // Only log to console, don't clutter Cucumber report
+      console.info(`Test failed: ${this.message}`);
+      console.info(`Baseline: ${baselinePath}`);
+      console.info(`Result: ${resultPathNegative}`);
+      console.info(`Diff: ${diffFile}`);
+      
+      // Collect the error for failed image comparisons
+      errors.push({ error: 'Image comparison failed', message: this.message });
     }
   }
 
   static finalizeTest() {
     if (errors.length > 0) {
       throwCollectedErrors();
-      console.error('❌ Test run completed with failures...');
+      // Only log to console, don't clutter Cucumber report
+      console.error('Test run completed with failures');
     } else {
-      console.log('✅ Test run completed successfully...');
+      // Only log to console, don't clutter Cucumber report
+      console.log('Test run completed successfully');
     }
   }
 }
@@ -203,27 +290,33 @@ async function takePageImage(filename, elementSnapshot = null, elementsToHide = 
   fs.ensureDirSync(resultDirPositive);
   const resultPathPositive = `${resultDirPositive}${filename}`;
 
-  if (elementSnapshot) {
-    let elem = await browser.$(elementSnapshot);
-    await elem.saveScreenshot(resultPathPositive, async (err) => {
-      await timeoutErrormsg(err);
-    });
-  } else {
-    await browser.saveScreenshot(resultPathPositive, async (err) => {
-      await timeoutErrormsg(err);
-    });
+  try {
+    // Use the new mode-aware screenshot function
+    await takeScreenshotImage(resultPathPositive, elementSnapshot);
+  } catch (error) {
+    const errorMessage = error && typeof error === 'object' && error.message ? error.message : 
+                       error && typeof error === 'string' ? error : 
+                       error && typeof error === 'number' ? `Error code: ${error}` : 
+                       'Unknown error occurred';
+    console.error(`Failed to take screenshot: ${errorMessage}`);
+    throw error;
   }
 
   if (elementsToHide) {
     await showElements(elementsToHide);
   }
-  console.log(`\t images saved to: ${resultPathPositive}`);
+  // Only log to console, don't clutter Cucumber report
+  console.info(`Screenshot saved: ${resultPathPositive}`);
 }
 
 async function timeoutErrormsg(err) {
   await browser.pause(DELAY_500ms);
   if (err) {
-    console.error(err.message);
+    const errorMessage = err && typeof err === 'object' && err.message ? err.message : 
+                       err && typeof err === 'string' ? err : 
+                       err && typeof err === 'number' ? `Error code: ${err}` : 
+                       'Unknown error occurred';
+    console.error(errorMessage);
   }
 }
 
@@ -255,5 +348,7 @@ async function showElements(selectors){
 
 module.exports = {
   takePageImage,
-  ImageAssertion
+  ImageAssertion,
+  clearErrors,
+  startNewTestRun
 };
