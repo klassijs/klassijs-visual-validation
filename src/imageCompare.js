@@ -50,7 +50,7 @@ function clearErrors() {
  * @param {string} elementSelector - CSS selector for element screenshot (optional)
  * @returns {Promise<void>}
  */
-async function takeScreenshotWithModeDetection(resultPathPositive, elementSelector = null) {
+async function takeScreenshotImage(resultPathPositive, elementSelector = null) {
   try {
     if (elementSelector) {
       // Element screenshot using W3C mode
@@ -303,7 +303,7 @@ async function takePageImage(filename, elementSnapshot = null, elementsToHide = 
 
   try {
     // Use the new mode-aware screenshot function
-    await takeScreenshotWithModeDetection(resultPathPositive, elementSnapshot);
+    await takeScreenshotImage(resultPathPositive, elementSnapshot);
   } catch (error) {
     const errorMessage = error && typeof error === 'object' && error.message ? error.message : 
                        error && typeof error === 'string' ? error : 
