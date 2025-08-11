@@ -1,4 +1,4 @@
-const { takePageImage, ImageAssertion } = require('../src/imageCompare');
+const { takePageImage, ImageAssertion, clearErrors, startNewTestRun } = require('../src/imageCompare');
 
 /**
  * Visual comparison function
@@ -40,4 +40,4 @@ async function takeImage(fileName, elementSnapshot, elementsToHide = '', shouldC
     }
 }
 
-module.exports = { compareImage, takeImage, ImageAssertion };
+module.exports = { compareImage, takeImage, ImageAssertion, clearErrors, startNewTestRun };
