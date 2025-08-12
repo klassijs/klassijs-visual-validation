@@ -26,6 +26,9 @@ async function compareImage(fileName){
  * @returns {Promise<void>}
  */
 async function takeImage(fileName, elementSnapshot, elementsToHide = '', shouldCompare = true, expectedTolerance = 0.2, waitBeforeCapture = 100) {
+    // Automatically start a new test run for each image capture
+    startNewTestRun();
+    
     if (waitBeforeCapture > 0) {
         await browser.pause(waitBeforeCapture);
     }
@@ -40,4 +43,4 @@ async function takeImage(fileName, elementSnapshot, elementsToHide = '', shouldC
     }
 }
 
-module.exports = { compareImage, takeImage, ImageAssertion, clearErrors, startNewTestRun };
+module.exports = { compareImage, takeImage, ImageAssertion, clearErrors };
