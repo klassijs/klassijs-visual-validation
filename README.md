@@ -182,4 +182,4 @@ We welcome contributions! If you encounter any bugs or have suggestions for impr
 
 ## License
 
-Licenced under [MIT License](LICENSE) &copy; 2025 [Larry Goddard](https://www.linkedin.com/in/larryg)
+Licenced under [MIT License](LICENSE) &copy; 2016 [Larry Goddard](https://www.linkedin.com/in/larryg)
