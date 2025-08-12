@@ -124,21 +124,6 @@ takeImage(fileName, elementSnapshot, elementsToHide, shouldCompare, expectedTole
 - `expectedTolerance` (number, optional): Tolerance for comparison (default: 0.2)
 - `waitBeforeCapture` (number, optional): Wait time in milliseconds before taking screenshot (default: 100)
 
-### `startNewTestRun` Function:
-```javascript
-startNewTestRun()
-```
-- Call this once at the start of your test suite
-- Ensures a clean errors array for the entire test run
-- Prevents cross-test error contamination
-
-### `clearErrors` Function:
-```javascript
-clearErrors()
-```
-- Manually clear the errors array if needed
-- Useful for custom error handling scenarios
-
 ## Advanced Options
 
 ### Dynamic Content Handling:
@@ -197,4 +182,4 @@ We welcome contributions! If you encounter any bugs or have suggestions for impr
 
 ## License
 
-This project is licensed under the MIT License.
+Licenced under [MIT License](LICENSE) &copy; 2025 [Larry Goddard](https://www.linkedin.com/in/larryg)
