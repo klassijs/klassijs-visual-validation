@@ -28,22 +28,13 @@ To add the **Visual Validation** tool to your project, you can use **pnpm**:
 
 Here's a guide on how to use **Visual Validation** in your project:
 
-### 1. **Start a New Test Run** (Important!)
-Before running your visual validation tests, call this once at the start of your test suite:
-```javascript
-const { startNewTestRun } = require('klassijs-visual-validation');
-
-// Call this once at the start of your test suite
-startNewTestRun();
-```
-
-### 2. **Import the Tool**:
+### 1. **Import the Tool**:
 Import the `visual-validation` module into your code:
 ```javascript
-const { takeImage, compareImage, ImageAssertion, clearErrors, startNewTestRun } = require('klassijs-visual-validation');
+const { takeImage, compareImage, ImageAssertion, clearErrors } = require('klassijs-visual-validation');
 ```
 
-### 3. **Take Screenshot and Compare** (Recommended):
+### 2. **Take Screenshot and Compare** (Recommended):
 Use the `takeImage` method to take a screenshot and automatically compare it with the baseline:
 ```javascript
 await takeImage('screenshot.png');
@@ -55,7 +46,7 @@ This single call will:
 - Generate diff images if differences are found
 - Log the comparison results
 
-### 4. **Advanced Usage Options**:
+### 3. **Advanced Usage Options**:
 ```javascript
 // Take screenshot of a specific element and compare
 await takeImage('button.png', '.submit-button');
@@ -73,7 +64,7 @@ await takeImage('screenshot.png', null, '', true, 0.1);
 await takeImage('screenshot.png', null, '', true, 0.2, 500);
 ```
 
-### 5. **Separate Comparison** (Legacy):
+### 4. **Separate Comparison** (Legacy):
 If you need to perform comparison separately:
 ```javascript
 await takeImage(fileName, elementSnapshot, elementsToHide);
@@ -85,12 +76,9 @@ await compareImage('path/to/actual-image.png');
 Here's a complete example that demonstrates how to use the **Visual Validation** tool:
 
 ```javascript
-const { takeImage, startNewTestRun } = require('klassijs-visual-validation');
+const { takeImage } = require('klassijs-visual-validation');
 
 async function validateVisualChanges() {
-    // Start a new test run (call this once at the start)
-    startNewTestRun();
-    
     // Take screenshot and compare with baseline in one call
     await takeImage('homepage.png');
     
