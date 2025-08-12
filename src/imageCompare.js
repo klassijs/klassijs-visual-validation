@@ -32,6 +32,14 @@ function startNewTestRun() {
 }
 
 /**
+ * Check if we should start a new test run (when there are no existing errors)
+ * @returns {boolean}
+ */
+function shouldStartNewTestRun() {
+  return errors.length === 0;
+}
+
+/**
  * This ensures test isolation and prevents errors from carrying over
  */
 function clearErrors() {
@@ -328,5 +336,6 @@ module.exports = {
   takePageImage,
   ImageAssertion,
   clearErrors,
-  startNewTestRun
+  startNewTestRun,
+  shouldStartNewTestRun
 };

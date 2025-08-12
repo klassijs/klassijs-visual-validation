@@ -1,4 +1,4 @@
-const { takePageImage, ImageAssertion, clearErrors, startNewTestRun } = require('../src/imageCompare');
+const { takePageImage, ImageAssertion, clearErrors, startNewTestRun, shouldStartNewTestRun } = require('../src/imageCompare');
 
 /**
  * Visual comparison function
@@ -26,8 +26,11 @@ async function compareImage(fileName){
  * @returns {Promise<void>}
  */
 async function takeImage(fileName, elementSnapshot, elementsToHide = '', shouldCompare = true, expectedTolerance = 0.2, waitBeforeCapture = 100) {
-    // Automatically start a new test run for each image capture
-    startNewTestRun();
+    // Automatically start a new test run if there are no existing errors
+    // This means we're starting fresh and should clear the state
+    if (shouldStartNewTestRun()) {
+        startNewTestRun();
+    }
     
     if (waitBeforeCapture > 0) {
         await browser.pause(waitBeforeCapture);
@@ -43,4 +46,4 @@ async function takeImage(fileName, elementSnapshot, elementsToHide = '', shouldC
     }
 }
 
-module.exports = { compareImage, takeImage, ImageAssertion, clearErrors };
+module.exports = { compareImage, takeImage, ImageAssertion, clearErrors, startNewTestRun };
