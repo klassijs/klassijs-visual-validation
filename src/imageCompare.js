@@ -1,9 +1,6 @@
 /**
  * klassijs
  * Copyright © 2016 - Larry Goddard
-
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  */
 require('dotenv').config();
 const resemble = require('klassijs-resembleJs');
@@ -29,6 +26,14 @@ console.error = function (message) {
  */
 function startNewTestRun() {
   clearErrors();
+}
+
+/**
+ * Check if we should start a new test run (when there are no existing errors)
+ * @returns {boolean}
+ */
+function shouldStartNewTestRun() {
+  return errors.length === 0;
 }
 
 /**
@@ -79,11 +84,11 @@ function throwCollectedErrors() {
           }
         }
       }
-      return errObj && typeof errObj === 'string' ? errObj : 
-             errObj && typeof errObj === 'number' ? `Error code: ${errObj}` : 
-             'Unknown error occurred';
+      return errObj && typeof errObj === 'string' ? errObj :
+        errObj && typeof errObj === 'number' ? `Error code: ${errObj}` :
+          'Unknown error occurred';
     }).join('\n');
-    
+
     // Only include the essential error messages
     const consoleMessage = `<div style="color:red;">${formattedErrorMessages}</div>`;
     if (cucumberThis && cucumberThis.attach) {
@@ -154,21 +159,21 @@ class ImageAssertion {
             await this.valueMethod(this.result, this.filename, resultDirNegative, resultDirPositive, diffDirNegative, diffDirPositive);
             await this.passMethod(this.result, this.filename, baselineDir, resultDirNegative, diffFile, this.value);
           } catch (err) {
-            const errorMessage = err && typeof err === 'object' && err.message ? err.message : 
-                               err && typeof err === 'string' ? err : 
-                               err && typeof err === 'number' ? `Error code: ${err}` : 
-                               'Unknown error occurred';
-            
+            const errorMessage = err && typeof err === 'object' && err.message ? err.message :
+              err && typeof err === 'string' ? err :
+                err && typeof err === 'number' ? `Error code: ${err}` :
+                  'Unknown error occurred';
+
             // log to console, don't clutter report
             console.error('Image comparison failure:', errorMessage);
             errors.push({ error: err, message: errorMessage });
           }
         });
     } catch (err) {
-      const errorMessage = err && typeof err === 'object' && err.message ? err.message : 
-                         err && typeof err === 'string' ? err : 
-                         err && typeof err === 'number' ? `Error code: ${err}` : 
-                         'Unknown error occurred';
+      const errorMessage = err && typeof err === 'object' && err.message ? err.message :
+        err && typeof err === 'string' ? err :
+          err && typeof err === 'number' ? `Error code: ${err}` :
+            'Unknown error occurred';
       console.error(`Error initiating image comparison: ${errorMessage}`);
       errors.push({ error: err, message: errorMessage });
     }
@@ -229,10 +234,10 @@ class ImageAssertion {
       await fs.copy(resultPathNegative, baselinePath, (err) => {
         console.info(`Baseline images updated from: ${resultPathNegative}`);
         if (err) {
-          const errorMessage = err && typeof err === 'object' && err.message ? err.message : 
-                             err && typeof err === 'string' ? err : 
-                             err && typeof err === 'number' ? `Error code: ${err}` : 
-                             'Unknown error occurred';
+          const errorMessage = err && typeof err === 'object' && err.message ? err.message :
+            err && typeof err === 'string' ? err :
+              err && typeof err === 'number' ? `Error code: ${err}` :
+                'Unknown error occurred';
           console.error(`Baseline images update failed: ${errorMessage}`);
           errors.push({ error: err, message: errorMessage });
         }
@@ -273,10 +278,10 @@ async function takePageImage(filename, elementSnapshot = null, elementsToHide = 
     // Use the new mode-aware screenshot function
     await takeScreenshotImage(resultPathPositive, elementSnapshot);
   } catch (error) {
-    const errorMessage = error && typeof error === 'object' && error.message ? error.message : 
-                       error && typeof error === 'string' ? error : 
-                       error && typeof error === 'number' ? `Error code: ${error}` : 
-                       'Unknown error occurred';
+    const errorMessage = error && typeof error === 'object' && error.message ? error.message :
+      error && typeof error === 'string' ? error :
+        error && typeof error === 'number' ? `Error code: ${error}` :
+          'Unknown error occurred';
     console.error(`Failed to take screenshot: ${errorMessage}`);
     throw error;
   }
@@ -290,10 +295,10 @@ async function takePageImage(filename, elementSnapshot = null, elementsToHide = 
 async function timeoutErrormsg(err) {
   await browser.pause(DELAY_500ms);
   if (err) {
-    const errorMessage = err && typeof err === 'object' && err.message ? err.message : 
-                       err && typeof err === 'string' ? err : 
-                       err && typeof err === 'number' ? `Error code: ${err}` : 
-                       'Unknown error occurred';
+    const errorMessage = err && typeof err === 'object' && err.message ? err.message :
+      err && typeof err === 'string' ? err :
+        err && typeof err === 'number' ? `Error code: ${err}` :
+          'Unknown error occurred';
     console.error(errorMessage);
   }
 }
@@ -328,5 +333,6 @@ module.exports = {
   takePageImage,
   ImageAssertion,
   clearErrors,
-  startNewTestRun
+  startNewTestRun,
+  shouldStartNewTestRun
 };
