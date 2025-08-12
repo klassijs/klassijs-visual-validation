@@ -9,11 +9,9 @@ require('dotenv').config();
 const resemble = require('klassijs-resembleJs');
 const fs = require('fs-extra');
 
-
 let diffFile;
 let browserName = BROWSER_NAME || global.browserName;
 
-// Constants for delays
 const DELAY_100ms = 100;
 const DELAY_500ms = 500;
 
@@ -27,16 +25,13 @@ console.error = function (message) {
 };
 
 /**
- * Start a new test run - call this once at the start of your test suite
  * This ensures a clean errors array for the entire test run
  */
 function startNewTestRun() {
   clearErrors();
-  console.info('Starting new visual validation test run');
 }
 
 /**
- * Clear the errors array to start fresh for each test
  * This ensures test isolation and prevents errors from carrying over
  */
 function clearErrors() {
@@ -54,9 +49,8 @@ async function takeScreenshotImage(resultPathPositive, elementSelector = null) {
   try {
     if (elementSelector) {
       // Element screenshot using W3C mode
-      let elem = await browser.$(elementSelector);
-      
       // Use direct Promise-based approach for WebdriverIO v9+
+      let elem = await browser.$(elementSelector);
       await elem.saveScreenshot(resultPathPositive);
     } else {
       // Page screenshot using W3C mode
@@ -85,13 +79,12 @@ function throwCollectedErrors() {
           }
         }
       }
-      // Fallback for other error types
       return errObj && typeof errObj === 'string' ? errObj : 
              errObj && typeof errObj === 'number' ? `Error code: ${errObj}` : 
              'Unknown error occurred';
     }).join('\n');
     
-    // Only include the essential error messages, not all console output
+    // Only include the essential error messages
     const consoleMessage = `<div style="color:red;">${formattedErrorMessages}</div>`;
     if (cucumberThis && cucumberThis.attach) {
       cucumberThis.attach(`Attachment (text/plain): ${consoleMessage}`);
@@ -161,25 +154,21 @@ class ImageAssertion {
             await this.valueMethod(this.result, this.filename, resultDirNegative, resultDirPositive, diffDirNegative, diffDirPositive);
             await this.passMethod(this.result, this.filename, baselineDir, resultDirNegative, diffFile, this.value);
           } catch (err) {
-            // Handle different types of errors
             const errorMessage = err && typeof err === 'object' && err.message ? err.message : 
                                err && typeof err === 'string' ? err : 
                                err && typeof err === 'number' ? `Error code: ${err}` : 
                                'Unknown error occurred';
             
-            // Only log to console, don't clutter Cucumber report
+            // log to console, don't clutter report
             console.error('Image comparison failure:', errorMessage);
             errors.push({ error: err, message: errorMessage });
           }
         });
     } catch (err) {
-      // Handle different types of errors
       const errorMessage = err && typeof err === 'object' && err.message ? err.message : 
                          err && typeof err === 'string' ? err : 
                          err && typeof err === 'number' ? `Error code: ${err}` : 
                          'Unknown error occurred';
-      
-      // Only log to console, don't clutter Cucumber report
       console.error(`Error initiating image comparison: ${errorMessage}`);
       errors.push({ error: err, message: errorMessage });
     }
@@ -199,7 +188,6 @@ class ImageAssertion {
       const writeStream = fs.createWriteStream(diffFile);
       await result.getDiffImage().pack().pipe(writeStream);
       writeStream.on('error', (err) => {
-        // Only log to console, don't clutter Cucumber report
         console.error('WriteStream error:', err.message);
       });
       fs.ensureDirSync(resultDirNegative);
@@ -212,7 +200,6 @@ class ImageAssertion {
       const writeStream = fs.createWriteStream(diffFile);
       result.getDiffImage().pack().pipe(writeStream);
       writeStream.on('error', (err) => {
-        // Only log to console, don't clutter Cucumber report
         console.error('WriteStream error:', err.message);
       });
     }
@@ -226,10 +213,8 @@ class ImageAssertion {
     const pass = value <= this.expected;
 
     if (pass) {
-      // Only log to console, don't clutter Cucumber report
       console.info(`Image match passed: ${filename} with ${value}% difference`);
     } else {
-      // Only log to console, don't clutter Cucumber report
       console.error(`Image match failed: ${this.message}`);
     }
 
@@ -242,7 +227,6 @@ class ImageAssertion {
         `    cp ${resultPathNegative} ${baselinePath}`
       );
       await fs.copy(resultPathNegative, baselinePath, (err) => {
-        // Only log to console, don't clutter Cucumber report
         console.info(`Baseline images updated from: ${resultPathNegative}`);
         if (err) {
           const errorMessage = err && typeof err === 'object' && err.message ? err.message : 
@@ -254,13 +238,10 @@ class ImageAssertion {
         }
       });
     } else if (!pass) {
-      // Only log to console, don't clutter Cucumber report
       console.info(`Test failed: ${this.message}`);
       console.info(`Baseline: ${baselinePath}`);
       console.info(`Result: ${resultPathNegative}`);
       console.info(`Diff: ${diffFile}`);
-      
-      // Collect the error for failed image comparisons
       errors.push({ error: 'Image comparison failed', message: this.message });
     }
   }
@@ -268,10 +249,8 @@ class ImageAssertion {
   static finalizeTest() {
     if (errors.length > 0) {
       throwCollectedErrors();
-      // Only log to console, don't clutter Cucumber report
       console.error('Test run completed with failures');
     } else {
-      // Only log to console, don't clutter Cucumber report
       console.log('Test run completed successfully');
     }
   }
@@ -305,7 +284,6 @@ async function takePageImage(filename, elementSnapshot = null, elementsToHide = 
   if (elementsToHide) {
     await showElements(elementsToHide);
   }
-  // Only log to console, don't clutter Cucumber report
   console.info(`Screenshot saved: ${resultPathPositive}`);
 }
 
