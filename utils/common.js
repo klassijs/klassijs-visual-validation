@@ -31,12 +31,12 @@ async function takeImage(fileName, elementSnapshot, elementsToHide = '', shouldC
     if (shouldStartNewTestRun()) {
         startNewTestRun();
     }
-    
+
     if (waitBeforeCapture > 0) {
         await browser.pause(waitBeforeCapture);
     }
     await takePageImage(fileName, elementSnapshot, elementsToHide);
-    
+
     // Perform comparison if requested
     if (shouldCompare) {
         const result = null;
@@ -46,4 +46,4 @@ async function takeImage(fileName, elementSnapshot, elementsToHide = '', shouldC
     }
 }
 
-module.exports = { compareImage, takeImage, ImageAssertion, clearErrors, startNewTestRun };
+module.exports = { compareImage, takeImage, ImageAssertion, clearErrors };
