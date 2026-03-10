@@ -46,11 +46,12 @@ function clearErrors() {
 
 /**
  * Take screenshot using W3C mode only
- * @param {string} resultPathPositive - Path to save the screenshot
- * @param {string} elementSelector - CSS selector for element screenshot (optional)
+ * @param {string}  resultPathPositive - Path to save the screenshot
+ * @param {string}  elementSelector - CSS selector for element screenshot (optional)
+ * @param {boolean} fullPage - whether to take a screenshot of the full page (optional)
  * @returns {Promise<void>}
  */
-async function takeScreenshotImage(resultPathPositive, elementSelector = null) {
+async function takeScreenshotImage(resultPathPositive, elementSelector = null, fullPage = false) {
   try {
     if (elementSelector) {
       // Element screenshot using W3C mode
@@ -60,7 +61,7 @@ async function takeScreenshotImage(resultPathPositive, elementSelector = null) {
     } else {
       // Page screenshot using W3C mode
       // Use direct Promise-based approach for WebdriverIO v9+
-      await browser.saveScreenshot(resultPathPositive);
+      await browser.saveScreenshot(resultPathPositive, { fullPage : fullPage });
     }
   } catch (error) {
     console.error(`Screenshot failed: ${error.message}`);
@@ -262,7 +263,7 @@ class ImageAssertion {
 }
 
 // takePageImage function to take a screenshot of the page
-async function takePageImage(filename, elementSnapshot = null, elementsToHide = null) {
+async function takePageImage(filename, elementSnapshot = null, elementsToHide = null, fullPage = false) {
   const envName = env.envName.toLowerCase();
   const resultDir = `./artifacts/visual-regression/original/${browserName}/${envName}/`;
   const resultDirPositive = `${resultDir}positive/`;
@@ -276,7 +277,7 @@ async function takePageImage(filename, elementSnapshot = null, elementsToHide = 
 
   try {
     // Use the new mode-aware screenshot function
-    await takeScreenshotImage(resultPathPositive, elementSnapshot);
+    await takeScreenshotImage(resultPathPositive, elementSnapshot, fullPage);
   } catch (error) {
     const errorMessage = error && typeof error === 'object' && error.message ? error.message :
       error && typeof error === 'string' ? error :

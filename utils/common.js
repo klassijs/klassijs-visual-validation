@@ -25,7 +25,7 @@ async function compareImage(fileName){
  * @param waitBeforeCapture
  * @returns {Promise<void>}
  */
-async function takeImage(fileName, elementSnapshot, elementsToHide = '', shouldCompare = true, expectedTolerance = 0.2, waitBeforeCapture = 100) {
+async function takeImage(fileName, elementSnapshot, elementsToHide = '', fullPage = false, shouldCompare = true, expectedTolerance = 0.2, waitBeforeCapture = 100) {
     // Automatically start a new test run if there are no existing errors
     // This means we're starting fresh and should clear the state
     if (shouldStartNewTestRun()) {
@@ -35,7 +35,7 @@ async function takeImage(fileName, elementSnapshot, elementsToHide = '', shouldC
     if (waitBeforeCapture > 0) {
         await browser.pause(waitBeforeCapture);
     }
-    await takePageImage(fileName, elementSnapshot, elementsToHide);
+    await takePageImage(fileName, elementSnapshot, elementsToHide, fullPage);
 
     // Perform comparison if requested
     if (shouldCompare) {
