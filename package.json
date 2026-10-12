@@ -8,8 +8,7 @@
     "linkedin": "https://linkedin.com/in/larryg",
     "youtube": "https://youtube.com/@LarryG_01",
     "github": "https://github.com/klassijs"
-  }
-,
+  },
   "contributors": [
     {
       "name": "Carlos Bermejo",
@@ -46,6 +45,7 @@
     "klassijs-resembleJs": "github:klassijs/klassijs-resembleJs"
   },
   "devDependencies": {
+    "jest": "^30.5.2",
     "standard-version": "github:klassijs/standard-version"
   }
 }

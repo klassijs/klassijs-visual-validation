@@ -46,4 +46,4 @@ async function takeImage(fileName, elementSnapshot, elementsToHide = '', fullPag
     }
 }
 
-module.exports = { compareImage, takeImage, ImageAssertion, clearErrors };
+module.exports = { compareImage, takeImage, ImageAssertion, clearErrors, startNewTestRun };
