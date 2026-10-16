@@ -1,5 +1,17 @@
 const { takePageImage, ImageAssertion, clearErrors, startNewTestRun, shouldStartNewTestRun } = require('../src/imageCompare');
 
+const DEFAULT_TOLERANCE = 0.2;
+
+function validateTolerance(expectedTolerance) {
+    if (expectedTolerance === null || expectedTolerance === undefined) {
+        return;
+    }
+
+    if (typeof expectedTolerance !== 'number' || Number.isNaN(expectedTolerance) || expectedTolerance < 0 || expectedTolerance > 100) {
+        throw new Error('Visual Validation: expectedTolerance must be a number between 0 and 100');
+    }
+}
+
 /**
  * Validate input parameters for takeImage function
  * @param {string} fileName - Screenshot filename
@@ -27,11 +39,7 @@ function validateTakeImageParams(fileName, elementSnapshot, elementsToHide, shou
         throw new Error('Visual Validation: shouldCompare must be a boolean');
     }
 
-    if (expectedTolerance !== null && expectedTolerance !== undefined) {
-        if (typeof expectedTolerance !== 'number' || isNaN(expectedTolerance) || expectedTolerance < 0 || expectedTolerance > 100) {
-            throw new Error('Visual Validation: expectedTolerance must be a number between 0 and 100');
-        }
-    }
+    validateTolerance(expectedTolerance);
 
     if (waitBeforeCapture !== null && waitBeforeCapture !== undefined) {
         if (typeof waitBeforeCapture !== 'number' || isNaN(waitBeforeCapture) || waitBeforeCapture < 0) {
@@ -42,23 +50,27 @@ function validateTakeImageParams(fileName, elementSnapshot, elementsToHide, shou
 
 /**
  * Visual comparison function
- * Compares an image with its baseline using default tolerance (0.2)
+ * Compares an image with its baseline.
+ * The tolerance defaults to 0.2 percent and can be overridden per call.
  *
  * @param {string} fileName - Filename of the image to compare (must exist in result directory)
+ * @param {number} expectedTolerance - Allowed mismatch percentage (default: 0.2, range: 0-100)
  * @returns {Promise<void>}
  * @throws {Error} If fileName is invalid or comparison fails
  * @example
  * await compareImage('homepage.png');
+ * await compareImage('homepage.png', 0.75);
  */
-async function compareImage(fileName) {
+async function compareImage(fileName, expectedTolerance = DEFAULT_TOLERANCE) {
     if (!fileName || typeof fileName !== 'string' || fileName.trim() === '') {
         throw new Error('Visual Validation: fileName is required and must be a non-empty string');
     }
 
-    const expected = 0.2;
+    validateTolerance(expectedTolerance);
+
     const result = null;
     const value = null;
-    const imageAssertion = new ImageAssertion(fileName, expected, result, value);
+    const imageAssertion = new ImageAssertion(fileName, expectedTolerance, result, value);
     await imageAssertion.run();
 }
 
@@ -105,7 +117,7 @@ async function compareImage(fileName) {
  * // Custom tolerance
  * await takeImage('text.png', null, '', true, 0.1);
  */
-async function takeImage(fileName, elementSnapshot, elementsToHide = '', shouldCompare = true, expectedTolerance = 0.2, waitBeforeCapture = 100) {
+async function takeImage(fileName, elementSnapshot, elementsToHide = '', shouldCompare = true, expectedTolerance = DEFAULT_TOLERANCE, waitBeforeCapture = 100) {
     // Validate input parameters
     validateTakeImageParams(fileName, elementSnapshot, elementsToHide, shouldCompare, expectedTolerance, waitBeforeCapture);
 

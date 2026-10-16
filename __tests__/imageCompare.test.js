@@ -1,18 +1,30 @@
+const { Readable, Writable } = require('stream');
 const fs = require('fs-extra');
 
+const pngBytes = Buffer.from('89504e470d0a1a0a', 'hex');
+
 jest.mock('dotenv', () => ({ config: jest.fn() }));
-jest.mock('fs-extra', () => ({
-  ensureDirSync: jest.fn(),
-  existsSync: jest.fn(),
-  writeFileSync: jest.fn(),
-  readFileSync: jest.fn(() => Buffer.from('png')),
-  createWriteStream: jest.fn(() => ({ on: jest.fn() })),
-  removeSync: jest.fn(),
-  copySync: jest.fn(),
-  copy: jest.fn(),
-}));
+jest.mock('fs-extra', () => {
+  const { Writable } = require('stream');
+  return {
+    ensureDirSync: jest.fn(),
+    existsSync: jest.fn(() => true),
+    writeFileSync: jest.fn(),
+    readFileSync: jest.fn(() => Buffer.from('89504e470d0a1a0a', 'hex')),
+    statSync: jest.fn(() => ({ isFile: () => true, size: 8 })),
+    createWriteStream: jest.fn(() => new Writable({
+      write(chunk, encoding, callback) {
+        callback();
+      },
+    })),
+    removeSync: jest.fn(),
+    copySync: jest.fn(),
+    copy: jest.fn(),
+  };
+});
 jest.mock('klassijs-resembleJs', () => {
-  const diffImage = { pack: () => ({ pipe: jest.fn() }) };
+  const { Readable } = require('stream');
+  const diffImage = { pack: () => Readable.from([Buffer.from('diff')]) };
   const resemble = jest.fn(() => ({
     compareTo() { return this; },
     ignoreAntialiasing() { return this; },
@@ -62,6 +74,7 @@ describe('takePageImage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     global.browser = {
+      pause: jest.fn().mockResolvedValue(undefined),
       saveScreenshot,
       execute: jest.fn().mockResolvedValue(undefined),
       $: jest.fn().mockResolvedValue({ saveScreenshot: elementScreenshot }),
@@ -80,8 +93,7 @@ describe('takePageImage', () => {
       "document.querySelectorAll('.ads').forEach(element => element.style.opacity = '0')"
     );
     expect(saveScreenshot).toHaveBeenCalledWith(
-      './artifacts/visual-regression/original/chrome/test/positive/home.png',
-      { fullPage: true }
+      './artifacts/visual-regression/original/chrome/test/positive/home.png'
     );
     expect(global.browser.execute).toHaveBeenLastCalledWith(
       "document.querySelectorAll('.ads').forEach(element => element.style.opacity = '1')"
@@ -109,14 +121,23 @@ describe('ImageAssertion', () => {
     jest.clearAllMocks();
     clearErrors();
     global.baselineImageUpdate = false;
-    fs.existsSync.mockReturnValue(true);
+    global.browser = { pause: jest.fn().mockResolvedValue(undefined) };
+    fs.existsSync.mockImplementation(() => true);
   });
 
   test('copies the captured image when no baseline exists and the match passes', async () => {
-    fs.existsSync.mockReturnValue(false);
+    let baselineSeen = false;
+    fs.existsSync.mockImplementation((filePath) => {
+      if (String(filePath).includes('visual-regression-baseline')) {
+        const exists = baselineSeen;
+        baselineSeen = true;
+        return exists;
+      }
+      return true;
+    });
     resemble.result = {
       misMatchPercentage: '0.10',
-      getDiffImage: () => ({ pack: () => ({ pipe: jest.fn() }) }),
+      getDiffImage: () => ({ pack: () => Readable.from([Buffer.from('diff')]) }),
     };
     const assertion = new ImageAssertion('home.png', 0.2, null, null);
 
@@ -125,7 +146,7 @@ describe('ImageAssertion', () => {
 
     expect(fs.writeFileSync).toHaveBeenCalledWith(
       './visual-regression-baseline/chrome/test/home.png',
-      Buffer.from('png')
+      pngBytes
     );
     expect(shouldStartNewTestRun()).toBe(true);
     expect(() => ImageAssertion.finalizeTest()).not.toThrow();
@@ -134,7 +155,7 @@ describe('ImageAssertion', () => {
   test('records a mismatch and finalizeTest throws the collected message', async () => {
     resemble.result = {
       misMatchPercentage: '1.50',
-      getDiffImage: () => ({ pack: () => ({ pipe: jest.fn() }) }),
+      getDiffImage: () => ({ pack: () => Readable.from([Buffer.from('diff')]) }),
     };
     const assertion = new ImageAssertion('home.png', 0.2, null, null);
 
