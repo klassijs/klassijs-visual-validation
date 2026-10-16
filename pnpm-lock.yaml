@@ -18,8 +18,8 @@ importers:
         specifier: ^1.0.1
         version: 1.0.1
       klassijs-resembleJs:
-        specifier: github:klassijs/klassijs-resembleJs
-        version: node-resemble-js@https://codeload.github.com/klassijs/klassijs-resembleJs/tar.gz/76b8749478e840ef627ac674861f8c402b833972
+        specifier: github:klassijs/klassijs-resembleJs#main
+        version: klassijs-resemblejs@https://codeload.github.com/klassijs/klassijs-resembleJs/tar.gz/6bc556a2d80128f36aebeae54f1ed6fe9ceefb34
     devDependencies:
       jest:
         specifier: ^30.5.2
@@ -1379,6 +1379,10 @@ packages:
   klassijs-astellen@1.0.1:
     resolution: {integrity: sha512-rCBPnhzNdjmKb9RqPqMldP8PGZg+slJjRtIJIKIo8GuC1Byf5PDBzsDxLvFYB9xmtyquUCRa7YQqUjcJCcPLLQ==}
 
+  klassijs-resemblejs@https://codeload.github.com/klassijs/klassijs-resembleJs/tar.gz/6bc556a2d80128f36aebeae54f1ed6fe9ceefb34:
+    resolution: {gitHosted: true, integrity: sha512-+TPxSNmDYa4CbQYznKVeW//oZ+MxwNmfojDpcy+85fgKXMiSpsnzDPxfKm4KGQwnzWeIsrN3v6fG22oYAWHLBw==, tarball: https://codeload.github.com/klassijs/klassijs-resembleJs/tar.gz/6bc556a2d80128f36aebeae54f1ed6fe9ceefb34}
+    version: 2.0.0
+
   leven@3.1.0:
     resolution: {integrity: sha512-qsda+H8jTaUaN/x5vzW2rzc+8Rw4TAQ/4KjB46IwK5VH+IlVeeeje/EoZRpiXvIqjFgK84QffqPztGI3VBLG1A==}
     engines: {node: '>=6'}
@@ -1506,10 +1510,6 @@ packages:
   node-releases@2.0.58:
     resolution: {integrity: sha512-BdiKAgbfRlvfMq/XzO/AF9NPmaA8a+YpLAyAFTVFBj3gARrAIfWvNq7Q7NE4se3KgFu0KkrvQMxTS0XVnsGzHg==}
     engines: {node: '>=18'}
-
-  node-resemble-js@https://codeload.github.com/klassijs/klassijs-resembleJs/tar.gz/76b8749478e840ef627ac674861f8c402b833972:
-    resolution: {gitHosted: true, tarball: https://codeload.github.com/klassijs/klassijs-resembleJs/tar.gz/76b8749478e840ef627ac674861f8c402b833972}
-    version: 1.2.0
 
   normalize-package-data@2.5.0:
     resolution: {integrity: sha512-/5CMN3T0R4XTj4DcGaexo+roZSdSFW/0AOOTROrjxzCG1wrWXEsGbRKevjlIL+ZDE4sZlJr5ED4YW0yqmkK+eA==}
@@ -1696,8 +1696,8 @@ packages:
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
 
-  react-is@19.3.0:
-    resolution: {integrity: sha512-UpMYezM4v5/18F28aC66AEsjXIgE02kyEMH6yLdgLXu/UTfa1Ntwck/nNLrbqJsEXW7gPb0coNO9FQse9WTovA==}
+  react-is@19.3.1:
+    resolution: {integrity: sha512-RRieF6IyxQBkcK6pP8xOHprLTPW6QjRkbGdImtqNme+/hYVwCZkLQLdlZGOhUqXwkS9IEynaGvPJtv6XB/cz0Q==}
 
   read-pkg-up@3.0.0:
     resolution: {integrity: sha512-YFzFrVvpC6frF1sz8psoHDBGF7fLPc+llq/8NB43oagqWkx8ar5zYtsTORtOjw9W2RHLpWP+zTWwBvf1bCmcSw==}
@@ -3643,6 +3643,11 @@ snapshots:
 
   klassijs-astellen@1.0.1: {}
 
+  klassijs-resemblejs@https://codeload.github.com/klassijs/klassijs-resembleJs/tar.gz/6bc556a2d80128f36aebeae54f1ed6fe9ceefb34:
+    dependencies:
+      jpeg-js: 0.4.4
+      pngjs: 7.0.0
+
   leven@3.1.0: {}
 
   lines-and-columns@1.2.4: {}
@@ -3755,11 +3760,6 @@ snapshots:
   node-int64@0.4.0: {}
 
   node-releases@2.0.58: {}
-
-  node-resemble-js@https://codeload.github.com/klassijs/klassijs-resembleJs/tar.gz/76b8749478e840ef627ac674861f8c402b833972:
-    dependencies:
-      jpeg-js: 0.4.4
-      pngjs: 7.0.0
 
   normalize-package-data@2.5.0:
     dependencies:
@@ -3901,7 +3901,7 @@ snapshots:
   pretty-format@30.5.1:
     dependencies:
       '@jest/react-is-18': react-is@18.3.1
-      '@jest/react-is-19': react-is@19.3.0
+      '@jest/react-is-19': react-is@19.3.1
       '@jest/schemas': 30.5.0
       ansi-styles: 5.2.0
 
@@ -3924,7 +3924,7 @@ snapshots:
 
   react-is@18.3.1: {}
 
-  react-is@19.3.0: {}
+  react-is@19.3.1: {}
 
   read-pkg-up@3.0.0:
     dependencies:
