@@ -118,7 +118,7 @@ async function takeImage(fileName, elementSnapshot, elementsToHide = '', shouldC
     if (waitBeforeCapture > 0) {
         await browser.pause(waitBeforeCapture);
     }
-    await takePageImage(fileName, elementSnapshot, elementsToHide, fullPage);
+    await takePageImage(fileName, elementSnapshot, elementsToHide);
 
     // Perform comparison if requested
     if (shouldCompare) {
