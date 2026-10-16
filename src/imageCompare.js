@@ -73,7 +73,7 @@ console.error = function (message) {
  */
 function extractErrorMessage(err) {
   if (!err) return 'Unknown error occurred';
-  
+
   if (typeof err === 'string') return err;
   if (typeof err === 'number') return `Error code: ${err}`;
   if (typeof err === 'object') {
@@ -125,7 +125,7 @@ function validateFileExists(filePath, context = 'file') {
   if (!fs.existsSync(filePath)) {
     throw new Error(`Visual Validation: ${context} file does not exist: ${filePath}`);
   }
-  
+
   try {
     const stats = fs.statSync(filePath);
     if (!stats.isFile()) {
@@ -153,7 +153,7 @@ function isValidImageFile(filePath) {
     // Check for common image file signatures
     const pngSignature = buffer.toString('hex', 0, 8) === '89504e470d0a1a0a';
     const jpegSignature = buffer.toString('hex', 0, 4) === 'ffd8ffe0' || buffer.toString('hex', 0, 4) === 'ffd8ffe1';
-    
+
     return pngSignature || jpegSignature;
   } catch (err) {
     return false;
@@ -194,7 +194,7 @@ function clearErrors() {
  */
 async function takeScreenshotImage(resultPathPositive, elementSelector = null) {
   validateFrameworkGlobals();
-  
+
   try {
     if (elementSelector) {
       // Element screenshot using W3C mode
@@ -206,11 +206,11 @@ async function takeScreenshotImage(resultPathPositive, elementSelector = null) {
       // Use direct Promise-based approach for WebdriverIO v9+
       await browser.saveScreenshot(resultPathPositive);
     }
-    
+
     // Validate that screenshot was actually created
     await browser.pause(100); // Small delay to ensure file system write completes
     validateFileExists(resultPathPositive, 'screenshot');
-    
+
     // Basic validation that it's a valid image file
     if (!isValidImageFile(resultPathPositive)) {
       console.warn(`Warning: Screenshot file may be corrupted or invalid: ${resultPathPositive}`);
@@ -244,11 +244,11 @@ function throwCollectedErrors() {
     const errorCount = errors.length;
     const summary = `Visual Validation: ${errorCount} image comparison ${errorCount === 1 ? 'failure' : 'failures'} detected:\n\n${formattedErrorMessages}`;
     const consoleMessage = `<div style="color:red;">${summary}</div>`;
-    
+
     if (typeof cucumberThis !== 'undefined' && cucumberThis && cucumberThis.attach) {
       cucumberThis.attach(`Attachment (text/plain): ${consoleMessage}`);
     }
-    
+
     // Clear errors before throwing to prevent double-reporting
     const errorToThrow = new Error(summary);
     errors.length = 0;
@@ -259,7 +259,7 @@ function throwCollectedErrors() {
 /**
  * ImageAssertion class for visual regression testing
  * Handles image comparison, diff generation, and baseline management
- * 
+ *
  * @class ImageAssertion
  * @example
  * const assertion = new ImageAssertion('homepage.png', 0.2, null, null);
@@ -292,13 +292,13 @@ class ImageAssertion {
    */
   async run() {
     validateFrameworkGlobals();
-    
+
     const envName = env.envName.toLowerCase();
     const paths = getDirectoryPaths(envName);
     const baselineDir = paths.baselineDir;
     const resultDir = paths.resultDir;
     const diffDir = paths.diffDir;
-    
+
     const resultDirPositive = `${resultDir}positive/`;
     const resultDirNegative = `${resultDir}negative/`;
     const diffDirPositive = `${diffDir}positive/`;
@@ -306,7 +306,7 @@ class ImageAssertion {
 
     const baselinePath = `${baselineDir}${this.filename}`;
     const resultPathPositive = `${resultDirPositive}${this.filename}`;
-    
+
     // Ensure directories exist
     fs.ensureDirSync(baselineDir);
     fs.ensureDirSync(diffDirPositive);
@@ -314,7 +314,7 @@ class ImageAssertion {
 
     // Validate that the screenshot file exists before comparison
     validateFileExists(resultPathPositive, 'screenshot result');
-    
+
     // Validate it's a valid image file
     if (!isValidImageFile(resultPathPositive)) {
       throw new Error(`Visual Validation: Screenshot file appears to be corrupted or invalid: ${resultPathPositive}`);
@@ -390,28 +390,28 @@ class ImageAssertion {
   async valueMethod(result, filename, resultDirNegative, resultDirPositive, diffDirNegative, diffDirPositive) {
     const resultPathNegative = `${resultDirNegative}${filename}`;
     const resultPathPositive = `${resultDirPositive}${filename}`;
-    
+
     // Wait for result with timeout to prevent infinite loops
     let waitTime = 0;
     while (typeof result === 'undefined' && waitTime < MAX_RESULT_WAIT_TIME) {
       await browser.pause(DELAY_100ms);
       waitTime += DELAY_100ms;
     }
-    
+
     if (typeof result === 'undefined') {
       throw new Error(`Visual Validation: Result was undefined after waiting ${MAX_RESULT_WAIT_TIME}ms for ${filename}`);
     }
-    
+
     // Validate result object structure
     if (!result || typeof result.misMatchPercentage === 'undefined') {
       throw new Error(`Visual Validation: Invalid comparison result for ${filename}`);
     }
-    
+
     const error = parseFloat(result.misMatchPercentage);
     if (isNaN(error)) {
       throw new Error(`Visual Validation: Invalid mismatch percentage for ${filename}`);
     }
-    
+
     fs.ensureDirSync(diffDirNegative);
 
     if (error > this.expected) {
@@ -419,10 +419,10 @@ class ImageAssertion {
       try {
         const writeStream = fs.createWriteStream(diffFile);
         await pipeline(result.getDiffImage().pack(), writeStream);
-        
+
         // Validate diff file was created
         validateFileExists(diffFile, 'diff');
-        
+
         fs.ensureDirSync(resultDirNegative);
         if (fs.existsSync(resultPathNegative)) {
           fs.removeSync(resultPathNegative);
@@ -430,7 +430,7 @@ class ImageAssertion {
         fs.copySync(resultPathPositive, resultPathNegative, false);
         // Validate copy was successful
         validateFileExists(resultPathNegative, 'negative result');
-        
+
         // Only log to console, don't clutter Cucumber report
         console.info(`Diff image created: ${diffFile}`);
       } catch (err) {
@@ -534,12 +534,12 @@ class ImageAssertion {
  */
 async function takePageImage(filename, elementSnapshot = null, elementsToHide = null) {
   validateFrameworkGlobals();
-  
+
   // Input validation
   if (!filename || typeof filename !== 'string' || filename.trim() === '') {
     throw new Error('Visual Validation: filename is required and must be a non-empty string');
   }
-  
+
   const envName = env.envName.toLowerCase();
   const paths = getDirectoryPaths(envName);
   const resultDir = paths.resultDir;
@@ -555,7 +555,7 @@ async function takePageImage(filename, elementSnapshot = null, elementsToHide = 
   try {
     // Use the new mode-aware screenshot function
     await takeScreenshotImage(resultPathPositive, elementSnapshot);
-    
+
     // Final validation that screenshot was created and is valid
     validateFileExists(resultPathPositive, 'screenshot');
   } catch (error) {
@@ -591,22 +591,22 @@ async function timeoutErrormsg(err) {
  */
 async function hideElements(selectors) {
   validateFrameworkGlobals();
-  
+
   if (!selectors) return;
-  
+
   // if arg is not an array make it one
   const selectorArray = typeof selectors === 'string' ? [selectors] : selectors;
-  
+
   if (!Array.isArray(selectorArray)) {
     throw new Error('Visual Validation: selectors must be a string or array of strings');
   }
-  
+
   for (let i = 0; i < selectorArray.length; i++) {
     if (typeof selectorArray[i] !== 'string') {
       console.warn(`Visual Validation: Skipping invalid selector at index ${i}: ${selectorArray[i]}`);
       continue;
     }
-    
+
     // Basic sanitization - escape single quotes to prevent injection
     const sanitizedSelector = selectorArray[i].replace(/'/g, "\\'");
     const script = `document.querySelectorAll('${sanitizedSelector}').forEach(element => element.style.opacity = '0')`;
@@ -626,22 +626,22 @@ async function hideElements(selectors) {
  */
 async function showElements(selectors) {
   validateFrameworkGlobals();
-  
+
   if (!selectors) return;
-  
+
   // if arg is not an array make it one
   const selectorArray = typeof selectors === 'string' ? [selectors] : selectors;
-  
+
   if (!Array.isArray(selectorArray)) {
     throw new Error('Visual Validation: selectors must be a string or array of strings');
   }
-  
+
   for (let i = 0; i < selectorArray.length; i++) {
     if (typeof selectorArray[i] !== 'string') {
       console.warn(`Visual Validation: Skipping invalid selector at index ${i}: ${selectorArray[i]}`);
       continue;
     }
-    
+
     // Basic sanitization - escape single quotes to prevent injection
     const sanitizedSelector = selectorArray[i].replace(/'/g, "\\'");
     const script = `document.querySelectorAll('${sanitizedSelector}').forEach(element => element.style.opacity = '1')`;

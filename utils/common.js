@@ -14,25 +14,25 @@ function validateTakeImageParams(fileName, elementSnapshot, elementsToHide, shou
     if (!fileName || typeof fileName !== 'string' || fileName.trim() === '') {
         throw new Error('Visual Validation: fileName is required and must be a non-empty string');
     }
-    
+
     if (elementSnapshot !== null && elementSnapshot !== undefined && typeof elementSnapshot !== 'string') {
         throw new Error('Visual Validation: elementSnapshot must be a string, null, or undefined');
     }
-    
+
     if (elementsToHide !== null && elementsToHide !== undefined && typeof elementsToHide !== 'string') {
         throw new Error('Visual Validation: elementsToHide must be a string, null, or undefined');
     }
-    
+
     if (shouldCompare !== null && shouldCompare !== undefined && typeof shouldCompare !== 'boolean') {
         throw new Error('Visual Validation: shouldCompare must be a boolean');
     }
-    
+
     if (expectedTolerance !== null && expectedTolerance !== undefined) {
         if (typeof expectedTolerance !== 'number' || isNaN(expectedTolerance) || expectedTolerance < 0 || expectedTolerance > 100) {
             throw new Error('Visual Validation: expectedTolerance must be a number between 0 and 100');
         }
     }
-    
+
     if (waitBeforeCapture !== null && waitBeforeCapture !== undefined) {
         if (typeof waitBeforeCapture !== 'number' || isNaN(waitBeforeCapture) || waitBeforeCapture < 0) {
             throw new Error('Visual Validation: waitBeforeCapture must be a non-negative number');
@@ -43,7 +43,7 @@ function validateTakeImageParams(fileName, elementSnapshot, elementsToHide, shou
 /**
  * Visual comparison function
  * Compares an image with its baseline using default tolerance (0.2)
- * 
+ *
  * @param {string} fileName - Filename of the image to compare (must exist in result directory)
  * @returns {Promise<void>}
  * @throws {Error} If fileName is invalid or comparison fails
@@ -54,7 +54,7 @@ async function compareImage(fileName) {
     if (!fileName || typeof fileName !== 'string' || fileName.trim() === '') {
         throw new Error('Visual Validation: fileName is required and must be a non-empty string');
     }
-    
+
     const expected = 0.2;
     const result = null;
     const value = null;
@@ -66,7 +66,7 @@ async function compareImage(fileName) {
  * Take an image of a page or an element and optionally compare it with baseline
  * This is the main function for visual regression testing. It automatically starts
  * a new test run if needed and collects errors across multiple calls.
- * 
+ *
  * @param {string} fileName - Name of the screenshot file (required)
  * @param {string|null} elementSnapshot - CSS selector for element screenshot (optional)
  *   - If provided, only the specified element will be captured
@@ -81,26 +81,26 @@ async function compareImage(fileName) {
  *   - Represents the percentage of difference allowed before test fails
  * @param {number} waitBeforeCapture - Wait time in milliseconds before capture (default: 100)
  *   - Useful for waiting for animations or dynamic content to stabilize
- * 
+ *
  * @returns {Promise<void>}
  * @throws {Error} If validation fails, screenshot fails, or comparison fails
- * 
+ *
  * @example
  * // Capture entire page and compare
  * await takeImage('homepage.png');
- * 
+ *
  * @example
  * // Capture specific element
  * await takeImage('button.png', '.submit-button');
- * 
+ *
  * @example
  * // Hide dynamic content
  * await takeImage('dashboard.png', null, '.timestamp, .user-info');
- * 
+ *
  * @example
  * // Capture without comparison
  * await takeImage('screenshot.png', null, '', false);
- * 
+ *
  * @example
  * // Custom tolerance
  * await takeImage('text.png', null, '', true, 0.1);
@@ -108,7 +108,7 @@ async function compareImage(fileName) {
 async function takeImage(fileName, elementSnapshot, elementsToHide = '', shouldCompare = true, expectedTolerance = 0.2, waitBeforeCapture = 100) {
     // Validate input parameters
     validateTakeImageParams(fileName, elementSnapshot, elementsToHide, shouldCompare, expectedTolerance, waitBeforeCapture);
-    
+
     // Automatically start a new test run if there are no existing errors
     // This means we're starting fresh and should clear the state
     if (shouldStartNewTestRun()) {
@@ -118,7 +118,7 @@ async function takeImage(fileName, elementSnapshot, elementsToHide = '', shouldC
     if (waitBeforeCapture > 0) {
         await browser.pause(waitBeforeCapture);
     }
-    await takePageImage(fileName, elementSnapshot, elementsToHide);
+    await takePageImage(fileName, elementSnapshot, elementsToHide, fullPage);
 
     // Perform comparison if requested
     if (shouldCompare) {
@@ -129,4 +129,4 @@ async function takeImage(fileName, elementSnapshot, elementsToHide = '', shouldC
     }
 }
 
-module.exports = { compareImage, takeImage, ImageAssertion, clearErrors };
+module.exports = { compareImage, takeImage, ImageAssertion, clearErrors, startNewTestRun };
