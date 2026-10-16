@@ -23,6 +23,18 @@ describe('compareImage', () => {
     const assertion = imageCompare.ImageAssertion.mock.results[0].value;
     expect(assertion.run).toHaveBeenCalledTimes(1);
   });
+
+  test('compares with a caller-supplied tolerance', async () => {
+    await compareImage('home.png', 0.75);
+
+    expect(imageCompare.ImageAssertion).toHaveBeenCalledWith('home.png', 0.75, null, null);
+  });
+
+  test('rejects a tolerance outside 0 to 100', async () => {
+    await expect(compareImage('home.png', -1)).rejects.toThrow(
+      'expectedTolerance must be a number between 0 and 100'
+    );
+  });
 });
 
 describe('takeImage', () => {
@@ -35,19 +47,19 @@ describe('takeImage', () => {
   test('starts a fresh run when no comparison errors are stored', async () => {
     imageCompare.shouldStartNewTestRun.mockReturnValue(true);
 
-    await takeImage('home.png', null, '', false, false, 0.2, 0);
+    await takeImage('home.png', null, '', false, 0.2, 0);
 
     expect(imageCompare.startNewTestRun).toHaveBeenCalledTimes(1);
-    expect(imageCompare.takePageImage).toHaveBeenCalledWith('home.png', null, '', false);
+    expect(imageCompare.takePageImage).toHaveBeenCalledWith('home.png', null, '');
     expect(imageCompare.ImageAssertion).not.toHaveBeenCalled();
     expect(global.browser.pause).not.toHaveBeenCalled();
   });
 
   test('waits, captures, then compares using the given tolerance', async () => {
-    await takeImage('card.png', '#card', '.cookie', true, true, 1.5, 250);
+    await takeImage('card.png', '#card', '.cookie', true, 1.5, 250);
 
     expect(global.browser.pause).toHaveBeenCalledWith(250);
-    expect(imageCompare.takePageImage).toHaveBeenCalledWith('card.png', '#card', '.cookie', true);
+    expect(imageCompare.takePageImage).toHaveBeenCalledWith('card.png', '#card', '.cookie');
     expect(imageCompare.ImageAssertion).toHaveBeenCalledWith('card.png', 1.5, null, null);
     const assertion = imageCompare.ImageAssertion.mock.results[0].value;
     expect(assertion.run).toHaveBeenCalledTimes(1);

@@ -69,6 +69,7 @@ If you need to perform comparison separately:
 ```javascript
 await takeImage(fileName, elementSnapshot, elementsToHide);
 await compareImage('path/to/actual-image.png');
+await compareImage('path/to/actual-image.png', 0.75);
 ```
 
 ## Example
@@ -109,8 +110,30 @@ takeImage(fileName, elementSnapshot, elementsToHide, shouldCompare, expectedTole
 - `elementSnapshot` (string, optional): CSS selector for specific element to screenshot
 - `elementsToHide` (string, optional): CSS selectors of elements to hide during screenshot
 - `shouldCompare` (boolean, optional): Whether to perform comparison (default: true)
-- `expectedTolerance` (number, optional): Tolerance for comparison (default: 0.2)
-- `waitBeforeCapture` (number, optional): Wait time in milliseconds before taking screenshot (default: 100)
+- `expectedTolerance` (number, optional): Allowed mismatch percentage (default: 0.2, range: 0-100). This is the **fifth** argument. Passing `0.1` here uses 0.1% and does not use the 0.2 default. It is not the last argument.
+- `waitBeforeCapture` (number, optional): Wait time in milliseconds before taking screenshot (default: 100). This is the last argument.
+
+`0.1` only changes the tolerance when it is in the fifth position:
+
+```javascript
+await takeImage('text.png', null, '', true, 0.1);           // tolerance 0.1%, wait stays 100ms
+await takeImage('text.png', null, '', true, 0.25, 500);    // tolerance 0.25%, wait 500ms
+```
+
+These do not change the tolerance:
+
+```javascript
+await takeImage('text.png', 0.1);                          // 0.1 is treated as an element selector
+await takeImage('text.png', null, '', true, 0.2, 0.1);     // tolerance stays 0.2%; 0.1 is the wait in milliseconds
+```
+
+### `compareImage` Function:
+```javascript
+compareImage(fileName, expectedTolerance)
+```
+
+- `fileName` (string, required): Name of the image to compare
+- `expectedTolerance` (number, optional): Allowed mismatch percentage (default: 0.2). Pass `0.1`, `0.25`, `0.75`, or any value from 0 to 100.
 
 ## Advanced Options
 
@@ -121,10 +144,12 @@ await takeImage('dashboard.png', null, '.timestamp, .user-info, .notification');
 ```
 
 ### Custom Tolerance:
+The fifth argument replaces the default of 0.2. Omit it to keep 0.2%.
+
 ```javascript
-// Use different tolerance for different types of content
-await takeImage('text-content.png', null, '', true, 0.1);  // Strict tolerance
-await takeImage('image-content.png', null, '', true, 0.5); // Relaxed tolerance
+await takeImage('text-content.png', null, '', true, 0.1);  // 0.1% instead of 0.2%
+await takeImage('image-content.png', null, '', true, 0.5); // 0.5% instead of 0.2%
+await compareImage('homepage.png', 0.75);                  // 0.75% instead of 0.2%
 ```
 
 ### Element-Specific Screenshots:
