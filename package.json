@@ -39,13 +39,13 @@
     ]
   },
   "dependencies": {
-    "dotenv": "^16.6.1",
-    "fs-extra": "^11.4.1",
-    "klassijs-astellen": "^1.0.1",
-    "klassijs-resembleJs": "github:klassijs/klassijs-resembleJs#main"
+    "dotenv": "18.0.8",
+    "fs-extra": "11.4.1",
+    "klassijs-astellen": "1.0.1",
+    "klassijs-resembleJs": "github:klassijs/klassijs-resembleJs"
   },
   "devDependencies": {
-    "jest": "^30.5.2",
+    "jest": "30.5.2",
     "standard-version": "github:klassijs/standard-version"
   }
 }
